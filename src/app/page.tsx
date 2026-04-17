@@ -1,65 +1,134 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import { useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import DuckLogo from '@/components/DuckLogo'
+
+const isDev = process.env.NODE_ENV === 'development'
+
+export default function LoginPage() {
+  const [email, setEmail] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+
+  const handleMagicLink = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setMessage(null)
+
+    try {
+      const supabase = await createClient()
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
+
+      if (error) throw error
+
+      setMessage({
+        type: 'success',
+        text: 'Check your email for the magic link',
+      })
+      setEmail('')
+    } catch (error: any) {
+      setMessage({
+        type: 'error',
+        text: error.message || 'Failed to send magic link',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDevBypass = async () => {
+    const bypassEmail = process.env.NEXT_PUBLIC_DEV_BYPASS_EMAIL
+    const bypassPassword = process.env.NEXT_PUBLIC_DEV_BYPASS_PASSWORD
+    if (!bypassEmail || !bypassPassword) {
+      setMessage({
+        type: 'error',
+        text: 'Dev bypass credentials not configured',
+      })
+      return
+    }
+
+    setLoading(true)
+    setMessage(null)
+
+    try {
+      const supabase = await createClient()
+      const { error } = await supabase.auth.signInWithPassword({
+        email: bypassEmail,
+        password: bypassPassword,
+      })
+
+      if (error) throw error
+
+      window.location.href = '/dashboard'
+    } catch (error: any) {
+      setMessage({
+        type: 'error',
+        text: error.message || 'Dev bypass failed',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="w-full max-w-sm px-6">
+        <div className="flex flex-col items-center mb-10">
+          <DuckLogo className="h-9 w-9 mb-5" />
+          <h1 className="text-2xl font-semibold tracking-tight">PeakLearn</h1>
+          <p className="text-muted-foreground text-sm mt-2">Your knowledge base, sharpened.</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        <form onSubmit={handleMagicLink} className="space-y-3">
+          <input
+            type="email"
+            placeholder="Email address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full h-11 px-4 rounded-md border border-input bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:border-ring focus:ring-2 focus:ring-ring/20 transition-colors duration-150"
+            required
+          />
+
+          {message && (
+            <div
+              className={`text-sm text-center p-3 rounded-lg ${
+                message.type === 'success'
+                  ? 'bg-accent text-accent-foreground'
+                  : 'bg-destructive/10 text-destructive'
+              }`}
+            >
+              {message.text}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full h-11 rounded-lg bg-primary text-primary-foreground text-sm font-medium tracking-tight hover:bg-primary/90 active:scale-[0.98] transition-all duration-150 disabled:opacity-50"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+            {loading ? 'Sending…' : 'Continue with Email'}
+          </button>
+        </form>
+
+        {isDev && process.env.NEXT_PUBLIC_ENABLE_DEV_BYPASS === 'true' && (
+          <div className="mt-8 pt-8 border-t border-border">
+            <button
+              type="button"
+              onClick={handleDevBypass}
+              disabled={loading}
+              className="w-full h-9 rounded-lg border border-border bg-secondary text-secondary-foreground text-xs font-medium hover:bg-secondary/70 transition-colors duration-150 disabled:opacity-50"
+            >
+              Dev Bypass
+            </button>
+          </div>
+        )}
+      </div>
     </div>
-  );
+  )
 }
