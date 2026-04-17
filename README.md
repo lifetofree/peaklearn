@@ -1,182 +1,244 @@
 # PeakLearn
 
-A personal knowledge management system with video collections, built with Next.js, Supabase, and TipTap.
+A personal knowledge management system for writers, learners, and researchers. Write rich-text articles, organize YouTube videos into collections, and search everything in one place.
+
+> **Status:** Alpha — single-user, personal use. Core CRUD functional. Not ready for public deployment without addressing the security items in [`REVIEWS.md`](./REVIEWS.md).
+
+---
 
 ## Features
 
-- ✨ **Magic Link Authentication** - Passwordless email login
-- 📝 **Rich Text Editor** - Notion-like block editor with TipTap
-- 🎥 **YouTube Video Collections** - Organize clips into playlists
-- 🔍 **Full-text Search** - Search across content and videos
-- 🏷️ **Tags & Categories** - Organize with tags and collections
-- 📊 **Content Versioning** - Track revision history (nice-to-have)
-- 💬 **Comments** - Add annotations to content (nice-to-have)
+| Feature | Status |
+|---------|--------|
+| Magic link (passwordless) auth | ✅ Live |
+| Rich-text article editor (TipTap) | ✅ Live |
+| Draft / publish workflow | ✅ Live |
+| Tags & tag filtering | ✅ Live |
+| Content version history (view & restore) | ✅ Live |
+| YouTube video collections | ✅ Live |
+| Auto-fetch video metadata via oEmbed | ✅ Live |
+| Cross-entity search (content + videos) | ✅ Live |
+| Dark mode (CSS variables ready) | ⚠️ Toggle not wired |
+| Comments on articles | 🔲 Schema ready, no UI |
+| Video duration display | 🔲 Schema ready, not populated |
+| Pagination | 🔲 Missing — will break at scale |
+| Toast notifications | 🔲 Actions complete silently |
+| `cmd+k` command palette | 🔲 Planned |
+| Image support in editor | 🔲 Planned |
+| Spaced repetition review mode | 🔲 Planned |
+| Video watch progress | 🔲 Planned |
+
+---
 
 ## Tech Stack
 
-- **Frontend**: Next.js 14 (App Router), TypeScript, Tailwind CSS
-- **Backend**: Supabase (Auth + PostgreSQL + Storage)
-- **Editor**: TipTap (ProseMirror-based)
-- **Video**: react-youtube with privacy-enhanced mode
-- **Hosting**: Vercel
-- **Styling**: Tailwind CSS + shadcn/ui components
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 16 (App Router), React 19 |
+| Language | TypeScript 5 (strict mode) |
+| Styling | Tailwind CSS 4 + CSS custom properties |
+| Auth + DB | Supabase (magic link OTP, PostgreSQL, RLS) |
+| Editor | TipTap 3 (ProseMirror-based, JSONB storage) |
+| Video | react-youtube (privacy-enhanced nocookie embed) |
+| UI Components | Custom (CVA + Radix Slot pattern) |
+| Icons | Lucide React |
+| Hosting | Vercel |
+
+---
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ installed
-- A Supabase account ([sign up free](https://supabase.com/))
+- Node.js 18+
+- A [Supabase](https://supabase.com/) account (free tier works)
 
-### 1. Clone the repository
+### 1. Clone and install
 
 ```bash
 git clone <repository-url>
 cd peaklearn
-```
-
-### 2. Install dependencies
-
-```bash
 npm install
 ```
 
-### 3. Set up Supabase
+### 2. Create a Supabase project
 
-1. Go to [supabase.com](https://supabase.com) and create a new project
-2. Wait for the project to be ready (usually 1-2 minutes)
-3. Go to **Settings > API** and copy:
+1. Go to [supabase.com](https://supabase.com) → New project
+2. Under **Settings → API**, copy:
    - Project URL
-   - anon public key
+   - `anon` public key
 
-4. Create the database tables:
-   - Go to **SQL Editor** in Supabase dashboard
-   - Copy the contents of `supabase/migrations/001_initial_schema.sql`
-   - Paste and run the SQL script
+### 3. Run the database migration
 
-5. Configure Email Auth:
-   - Go to **Authentication > Providers**
-   - Enable **Email** provider
-   - Configure email settings (Supabase provides free email service)
+In the Supabase dashboard → **SQL Editor**, paste and run:
+
+```
+supabase/migrations/001_initial_schema.sql
+```
+
+This creates all 6 tables, RLS policies, GIN indexes, and auth triggers.
 
 ### 4. Configure environment variables
 
-Create a `.env.local` file in the root directory:
+Create `.env.local` in the project root:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+NEXT_PUBLIC_SITE_URL=http://localhost:3838
+
+# Development only — enables email/password bypass for local testing
+NEXT_PUBLIC_ENABLE_DEV_BYPASS=true
+NEXT_PUBLIC_DEV_BYPASS_EMAIL=dev@example.com
+NEXT_PUBLIC_DEV_BYPASS_PASSWORD=your-dev-password
 ```
 
-### 5. Run the development server
+### 5. Start the development server
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3838](http://localhost:3838).
+
+---
 
 ## Project Structure
 
 ```
 peaklearn/
 ├── src/
-│   ├── app/                    # Next.js App Router pages
-│   │   ├── auth/              # Authentication pages
-│   │   ├── content/           # Content management
-│   │   ├── videos/            # Video collections
-│   │   ├── search/            # Search page
-│   │   ├── settings/          # User settings
-│   │   ├── dashboard/         # Main dashboard
-│   │   ├── layout.tsx         # Root layout
-│   │   └── globals.css        # Global styles
+│   ├── app/                        # Next.js App Router pages
+│   │   ├── auth/callback/          # Magic link exchange handler
+│   │   ├── content/                # Articles (list, new, view, edit, versions)
+│   │   ├── videos/                 # Videos & collections (list, add, view, edit)
+│   │   ├── search/                 # Cross-entity search
+│   │   ├── dashboard/              # Main dashboard
+│   │   ├── settings/               # Account settings + sign out
+│   │   ├── layout.tsx              # Root layout (fonts, globals)
+│   │   └── globals.css             # CSS variables (theme, dark mode)
 │   ├── components/
-│   │   ├── ui/                # UI components (shadcn/ui)
-│   │   ├── editor/            # TipTap editor
-│   │   ├── DuckLogo.tsx       # Logo component
-│   │   └── YouTubeEmbed.tsx   # YouTube player
+│   │   ├── ui/                     # Button, Card, Input (shadcn/ui-style)
+│   │   ├── editor/                 # TipTap editor + SSR-safe wrapper
+│   │   ├── Header.tsx              # Sticky header with nav
+│   │   ├── HeaderActions.tsx       # Settings + sign out buttons
+│   │   ├── DuckLogo.tsx            # SVG duck mascot
+│   │   ├── YouTubeEmbed.tsx        # Privacy-enhanced player
+│   │   └── DevBanner.tsx / DevTabBar.tsx  # Dev-only helpers
 │   ├── lib/
-│   │   ├── supabase/          # Supabase client
-│   │   ├── utils.ts           # Utility functions
-│   │   └── youtube.ts         # YouTube utilities
+│   │   ├── supabase/client.ts      # Browser Supabase client
+│   │   ├── supabase/server.ts      # Server Supabase client (cookie-based)
+│   │   ├── utils.ts                # cn() helper (clsx + tailwind-merge)
+│   │   └── youtube.ts              # ID extraction, embed URL, thumbnail, duration parsing
 │   └── types/
-│       └── database.ts        # TypeScript types
+│       └── database.ts             # TypeScript interfaces for all 6 tables
 ├── supabase/
-│   └── migrations/            # Database migrations
-└── package.json
+│   └── migrations/
+│       └── 001_initial_schema.sql  # Full schema with RLS and triggers
+├── AGENTS.md                       # Agent/LLM guide for this codebase
+├── BACKLOGS.md                     # Prioritized feature backlog
+├── CHANGELOGS.md                   # Change history
+└── REVIEWS.md                      # Security and code quality review
 ```
+
+---
 
 ## Database Schema
 
 ### Tables
 
-- `users` - User profiles (extends Supabase auth)
-- `collections` - Video playlists/collections
-- `videos` - YouTube video clips
-- `content` - Knowledge articles
-- `content_versions` - Content revision history
-- `comments` - Article comments
+| Table | Purpose | Key Columns |
+|-------|---------|-------------|
+| `users` | Extends `auth.users` | `id`, `email`, `role` (owner / contributor / viewer) |
+| `collections` | Video playlists | `title`, `description`, `user_id` |
+| `videos` | YouTube clips | `youtube_url`, `title`, `thumbnail_url`, `duration` (seconds), `tags[]`, `collection_id` (nullable) |
+| `content` | Knowledge articles | `title`, `body` (JSONB — TipTap state), `tags[]`, `is_published`, `created_by` |
+| `content_versions` | Revision snapshots | `content_id`, `body` (JSONB), `version_number` |
+| `comments` | Article annotations | `content_id`, `body`, `created_by` |
 
-### Row Level Security (RLS)
+### Security
 
-All tables have RLS enabled to ensure users can only access their own data.
+- Row Level Security (RLS) enabled on all 6 tables — users can only read/write their own rows.
+- All auth managed server-side via `@supabase/ssr` — session cookies never exposed to JS.
+- Magic link tokens expire after 15 minutes and are single-use.
+
+---
 
 ## Pages
 
-| Path | Description |
-|------|-------------|
-| `/` | Login page (magic link) |
-| `/dashboard` | Main dashboard with overview |
-| `/content` | List all articles |
-| `/content/new` | Create new article |
-| `/content/[id]` | View/edit article |
-| `/videos` | Video collections list |
-| `/videos/[collectionId]` | View collection |
-| `/videos/add` | Add new video |
-| `/videos/new-collection` | Create collection |
-| `/search` | Full-text search |
-| `/settings` | User settings |
+| Route | Type | Description |
+|-------|------|-------------|
+| `/` | Client | Login (magic link email form) |
+| `/auth/callback` | Server | Exchanges magic link code for session |
+| `/dashboard` | Server | Recent items, quick search, nav overview |
+| `/content` | Server | Article list with tag filtering |
+| `/content/new` | Client | Create article (TipTap editor) |
+| `/content/[id]` | Server | View article (read-only render) |
+| `/content/[id]/edit` | Client | Edit article, save version snapshot |
+| `/content/[id]/versions` | Server | View and restore version history |
+| `/videos` | Server | Collections + uncategorized videos |
+| `/videos/add` | Client | Add video by YouTube URL |
+| `/videos/new-collection` | Client | Create collection |
+| `/videos/[collectionId]` | Server | View collection + video list |
+| `/videos/[collectionId]/edit` | Client | Edit collection metadata, delete |
+| `/videos/v/[id]` | Server | Video detail + YouTube embed |
+| `/videos/v/[id]/edit` | Client | Edit metadata, move collection, delete |
+| `/search` | Server | Cross-entity search (content + videos) |
+| `/settings` | Client | Account info, sign out |
 
-## Features in Detail
+---
 
-### Magic Link Authentication
+## Suggested New Features
 
-- Passwordless email login
-- 15-minute token expiry
-- Single-use tokens for security
-- Automatic user creation on first login
+These are not in the backlog yet but would significantly improve the product:
 
-### YouTube Integration
+### Short-term (1–2 days each)
+- **`cmd+k` command palette** — keyboard-first search without page navigation
+- **Toast notifications** — lightweight feedback for save/delete/move actions
+- **Pagination / infinite scroll** — required before the lists break at scale
+- **Video duration on add** — `parseIsoDuration()` already exists in `src/lib/youtube.ts`; wire it up
+- **Dark mode toggle** — CSS variables are ready; just needs a button + `document.documentElement.classList.toggle('dark')`
+- **Content delete handler** — button UI exists on `/content/[id]` but has no `onClick`
+- **Link URL validation in editor** — prevent `javascript:` URLs in `window.prompt()` link dialog
 
-- Privacy-enhanced player (`youtube-nocookie.com`)
-- Auto-fetch video metadata (title, description)
-- Thumbnail support
-- Collections/playlists
-- Tag support
+### Medium-term (3–7 days each)
+- **Comments UI** — table and RLS exist; add list + form below article body on `/content/[id]`
+- **Pin / favorites** — `is_pinned` boolean on content and videos; pinned items float to dashboard top
+- **Full-text search** — replace `ILIKE` with PostgreSQL `tsvector` generated column + `@@` operator for ranked results
+- **Video watch progress** — persist `watch_position` per user+video; resume on next visit
+- **Reading time estimate** — calculate from TipTap JSON word count; display on article cards
+- **Export** — content to Markdown (TipTap JSON → MD), video collections to CSV/text
 
-### Content Editor
+### Longer-term
+- **Spaced repetition review mode** — flashcard-style review surfacing content not visited recently (based on `updated_at`)
+- **Image support in editor** — TipTap `@tiptap/extension-image` + Supabase Storage for uploads
+- **Keyboard shortcuts panel** — discoverable `?` help modal listing all shortcuts
+- **Contributor/viewer roles** — `role` field exists on `users` table; build shared workspace
+- **Notion-style slash commands** — `/heading`, `/quote`, `/code` block insertion in editor
+- **AI-assisted tagging** — auto-suggest tags based on article content (Claude API)
+- **Weekly review digest** — email summary of items added/not reviewed this week
 
-- Block-based editor (TipTap)
-- Rich text formatting (bold, italic, lists, links)
-- Markdown support
-- Tags and categories
-- Draft/publish workflow
-- Version history tracking
+---
+
+## Development
+
+```bash
+npm run dev      # Dev server on http://localhost:3838
+npm run build    # Production build
+npm run lint     # ESLint (TypeScript-aware)
+```
+
+No separate typecheck script — ESLint handles type checking via `@typescript-eslint`.
+
+---
 
 ## Deployment
 
-### Vercel
+### Vercel (recommended)
 
-1. Push your code to GitHub
-2. Import project in [Vercel](https://vercel.com)
-3. Add environment variables in Vercel dashboard:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `NEXT_PUBLIC_SITE_URL` (set to your production URL)
-4. Deploy!
-
-### Environment Variables for Production
+1. Push to GitHub
+2. Import at [vercel.com](https://vercel.com)
+3. Add environment variables in the Vercel dashboard:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
@@ -184,10 +246,23 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 NEXT_PUBLIC_SITE_URL=https://your-domain.com
 ```
 
+4. Set the Supabase **Site URL** and **Redirect URL** to your production domain under **Authentication → URL Configuration**.
+
+### Pre-production checklist
+
+- [ ] Remove or disable `NEXT_PUBLIC_ENABLE_DEV_BYPASS` in production env
+- [ ] Add `UPDATE` and `DELETE` RLS policies for `content_versions` table (see [`REVIEWS.md`](./REVIEWS.md))
+- [ ] Fix SQL injection in search (parameterize the `.or()` filter)
+- [ ] Add `not-found.tsx` pages for missing content/video routes
+- [ ] Set up error monitoring (Sentry, Axiom, or similar)
+- [ ] Verify Supabase email provider is configured with a custom SMTP for reliability
+
+---
+
 ## License
 
 MIT
 
-## Support
+## Contributing
 
-For issues and questions, please open an issue on GitHub.
+Issues and PRs welcome. For significant changes, open an issue first to discuss scope.

@@ -95,9 +95,14 @@ export default function Editor({
             variant="ghost"
             size="icon"
             onClick={() => {
-              const url = window.prompt('Enter URL:')
-              if (url) {
-                editor.chain().focus().setLink({ href: url }).run()
+              const input = window.prompt('Enter URL:')
+              if (!input) return
+              try {
+                const parsed = new URL(input)
+                if (!['http:', 'https:'].includes(parsed.protocol)) return
+                editor.chain().focus().setLink({ href: parsed.href }).run()
+              } catch {
+                // invalid URL — do nothing
               }
             }}
             className={editor.isActive('link') ? 'bg-accent' : ''}

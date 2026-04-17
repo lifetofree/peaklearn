@@ -5,23 +5,6 @@ import Header from '@/components/Header'
 import { FileText, Video, X } from 'lucide-react'
 import type { Content, Video as VideoType } from '@/types/database'
 
-function sanitizeForLike(input: string): string {
-  return input
-    .slice(0, 100)
-    .replace(/[%_()\[\]{}^'"\\;]/g, (match) => '\\' + match)
-}
-
-function sanitizeForJson(input: string): string {
-  return input
-    .slice(0, 100)
-    .replace(/'/g, "'")
-    .replace(/"/g, '"')
-    .replace(/;/g, '')
-    .replace(/--/g, '')
-    .replace(/\\/g, '\\\\')
-    .replace(/\x00/g, '')
-}
-
 export default async function SearchPage({
   searchParams,
 }: {
@@ -39,35 +22,40 @@ export default async function SearchPage({
     redirect('/')
   }
 
-  const rawQuery = sp.q || ''
-  const sanitizedQuery = sanitizeForJson(rawQuery)
-  const safeQuery = sanitizeForLike(rawQuery)
+  const rawQuery = (sp.q || '').trim().slice(0, 100)
 
   let contentResults: Content[] = []
   let videoResults: VideoType[] = []
 
   if (rawQuery) {
-    const [contentRes, videoRes] = await Promise.all([
-      supabase
-        .from('content')
-        .select('*')
-        .or(`title.ilike.%${safeQuery}%,tags.cs.{${safeQuery}}`)
-        .order('updated_at', { ascending: false }),
-
-      supabase
-        .from('videos')
-        .select('*')
-        .or(`title.ilike.%${safeQuery}%,description.ilike.%${safeQuery}%,tags.cs.{${safeQuery}}`)
-        .order('created_at', { ascending: false }),
+    const [
+      { data: contentByTitle },
+      { data: contentByTag },
+      { data: videosByTitle },
+      { data: videosByDesc },
+      { data: videosByTag },
+    ] = await Promise.all([
+      supabase.from('content').select('id,title,tags,updated_at,is_published,body,created_by').ilike('title', `%${rawQuery}%`).order('updated_at', { ascending: false }),
+      supabase.from('content').select('id,title,tags,updated_at,is_published,body,created_by').contains('tags', [rawQuery]).order('updated_at', { ascending: false }),
+      supabase.from('videos').select('id,title,description,tags,thumbnail_url,youtube_url,collection_id,user_id,created_at,duration').ilike('title', `%${rawQuery}%`).order('created_at', { ascending: false }),
+      supabase.from('videos').select('id,title,description,tags,thumbnail_url,youtube_url,collection_id,user_id,created_at,duration').ilike('description', `%${rawQuery}%`).order('created_at', { ascending: false }),
+      supabase.from('videos').select('id,title,description,tags,thumbnail_url,youtube_url,collection_id,user_id,created_at,duration').contains('tags', [rawQuery]).order('created_at', { ascending: false }),
     ])
 
-    contentResults = contentRes.data || []
-    videoResults = videoRes.data || []
+    const seenContent = new Set<string>()
+    contentResults = [...(contentByTitle || []), ...(contentByTag || [])].filter(
+      (item) => !seenContent.has(item.id) && !!seenContent.add(item.id)
+    ) as Content[]
+
+    const seenVideos = new Set<string>()
+    videoResults = [...(videosByTitle || []), ...(videosByDesc || []), ...(videosByTag || [])].filter(
+      (item) => !seenVideos.has(item.id) && !!seenVideos.add(item.id)
+    ) as VideoType[]
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <Header showSearch searchValue={sanitizedQuery} />
+      <Header showSearch searchValue={rawQuery} />
       {rawQuery && (
         <div className="container mx-auto px-4 py-2">
           <Link
@@ -85,7 +73,7 @@ export default async function SearchPage({
           <div>
             <div className="mb-8">
               <h2 className="text-2xl font-bold mb-2">
-                Search results for &ldquo;{sanitizedQuery}&rdquo;
+                Search results for &ldquo;{rawQuery}&rdquo;
               </h2>
               <p className="text-muted-foreground">
                 {contentResults.length + videoResults.length} results found
@@ -163,7 +151,7 @@ export default async function SearchPage({
 
             {contentResults.length === 0 && videoResults.length === 0 && (
               <div className="text-center py-12 text-muted-foreground">
-                <p>No results found for &ldquo;{sanitizedQuery}&rdquo;</p>
+                <p>No results found for &ldquo;{rawQuery}&rdquo;</p>
               </div>
             )}
           </div>
