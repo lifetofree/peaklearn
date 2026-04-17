@@ -79,15 +79,7 @@ export default async function DashboardPage() {
             <DuckLogo />
             <span className="text-base font-semibold tracking-tight">PeakLearn</span>
           </div>
-          <nav className="hidden sm:flex items-center gap-0.5">
-            <NavLinks activeHref="/dashboard" />
-          </nav>
           <HeaderActions />
-        </div>
-        <div className="sm:hidden border-t bg-background">
-          <div className="container mx-auto px-4 flex items-center gap-0.5 overflow-x-auto py-2">
-            <NavLinks activeHref="/dashboard" />
-          </div>
         </div>
       </header>
 
