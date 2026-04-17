@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import DuckLogo from '@/components/DuckLogo'
-import HeaderActions from '@/components/HeaderActions'
+import Header from '@/components/Header'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -11,6 +10,10 @@ import {
   Plus,
   Search,
 } from 'lucide-react'
+import type { Content, Video as VideoType, Collection } from '@/types/database'
+
+type RecentContent = Pick<Content, 'id' | 'title' | 'updated_at'>
+type RecentVideo = Pick<VideoType, 'id' | 'title' | 'created_at'>
 
 const navLinks = [
   { href: '/dashboard', label: 'Dashboard' },
@@ -59,29 +62,24 @@ export default async function DashboardPage() {
       .from('content')
       .select('id,title,updated_at')
       .order('updated_at', { ascending: false })
-      .limit(5),
+      .limit(5)
+      .returns<RecentContent[]>(),
     supabase
       .from('videos')
       .select('id,title,created_at')
       .order('created_at', { ascending: false })
-      .limit(5),
+      .limit(5)
+      .returns<RecentVideo[]>(),
     supabase
       .from('collections')
       .select('id,title,description')
-      .order('created_at', { ascending: false }),
+      .order('created_at', { ascending: false })
+      .returns<Collection[]>(),
   ])
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-background/95 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <DuckLogo />
-            <span className="text-base font-semibold tracking-tight">PeakLearn</span>
-          </div>
-          <HeaderActions />
-        </div>
-      </header>
+      <Header />
 
       <main className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-7">
@@ -136,7 +134,7 @@ export default async function DashboardPage() {
             <CardContent>
               {recentContent && recentContent.length > 0 ? (
                 <ul className="space-y-3">
-                  {recentContent.map((item: any) => (
+                  {recentContent.map((item: RecentContent) => (
                     <li key={item.id}>
                       <a
                         href={`/content/${item.id}`}
@@ -169,7 +167,7 @@ export default async function DashboardPage() {
             <CardContent>
               {recentVideos && recentVideos.length > 0 ? (
                 <ul className="space-y-3">
-                  {recentVideos.map((video: any) => (
+                  {recentVideos.map((video: RecentVideo) => (
                     <li key={video.id}>
                       <a
                         href={`/videos/v/${video.id}`}
@@ -199,7 +197,7 @@ export default async function DashboardPage() {
             <CardContent>
               {collections && collections.length > 0 ? (
                 <ul className="space-y-3">
-                  {collections.map((collection: any) => (
+                  {collections.map((collection: Collection) => (
                     <li key={collection.id}>
                       <a
                         href={`/videos/${collection.id}`}

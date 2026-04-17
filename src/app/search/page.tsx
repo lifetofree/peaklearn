@@ -1,8 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import DuckLogo from '@/components/DuckLogo'
-import { Search, FileText, Video, X } from 'lucide-react'
+import Header from '@/components/Header'
+import { FileText, Video, X } from 'lucide-react'
+import type { Content, Video as VideoType } from '@/types/database'
 
 function sanitizeForLike(input: string): string {
   return input
@@ -42,8 +43,8 @@ export default async function SearchPage({
   const sanitizedQuery = sanitizeForJson(rawQuery)
   const safeQuery = sanitizeForLike(rawQuery)
 
-  let contentResults: any[] = []
-  let videoResults: any[] = []
+  let contentResults: Content[] = []
+  let videoResults: VideoType[] = []
 
   if (rawQuery) {
     const [contentRes, videoRes] = await Promise.all([
@@ -66,32 +67,18 @@ export default async function SearchPage({
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center gap-3">
-            <DuckLogo />
-            <h1 className="text-2xl font-bold">PeakLearn</h1>
+      <Header showSearch searchValue={sanitizedQuery} />
+      {rawQuery && (
+        <div className="container mx-auto px-4 py-2">
+          <Link
+            href="/search"
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+            Clear search
           </Link>
-          <form action="/search" method="GET" className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              type="text"
-              name="q"
-              defaultValue={sanitizedQuery}
-              placeholder="Search..."
-              className="pl-10 pr-10 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-ring w-64 md:w-96"
-            />
-            {rawQuery && (
-              <Link
-                href="/search"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-4 w-4" />
-              </Link>
-            )}
-          </form>
         </div>
-      </header>
+      )}
 
       <main className="container mx-auto px-4 py-8">
         {rawQuery ? (
