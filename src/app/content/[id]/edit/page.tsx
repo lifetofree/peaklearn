@@ -9,6 +9,8 @@ import DuckLogo from '@/components/DuckLogo'
 import Editor from '@/components/editor/Editor'
 import { ArrowLeft, Save, X, Tag, History } from 'lucide-react'
 import Link from 'next/link'
+import { Toast } from '@/components/ui/toast'
+import { useToast } from '@/hooks/use-toast'
 
 export default function ContentEditPage() {
   const params = useParams()
@@ -23,6 +25,7 @@ export default function ContentEditPage() {
   const [isPublished, setIsPublished] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const { toast, showToast, dismiss } = useToast()
 
   useEffect(() => {
     loadContent()
@@ -87,11 +90,12 @@ export default function ContentEditPage() {
     setSaving(false)
 
     if (error) {
-      alert('Failed to save content')
+      showToast('Failed to save — please try again', 'error')
       return
     }
 
-    router.push(`/content/${params.id}`)
+    setOriginalContent(content)
+    showToast('Saved successfully')
   }
 
   const addTag = () => {
@@ -225,6 +229,7 @@ export default function ContentEditPage() {
           </div>
         </div>
       </main>
+      {toast && <Toast message={toast.message} type={toast.type} onDismiss={dismiss} />}
     </div>
   )
 }

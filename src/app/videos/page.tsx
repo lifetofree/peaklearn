@@ -3,9 +3,16 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import DuckLogo from '@/components/DuckLogo'
-import { Plus, Folder, Video, Edit } from 'lucide-react'
+import { Plus, Folder, Video, Edit, ChevronLeft, ChevronRight } from 'lucide-react'
 
-export default async function VideosPage() {
+const PAGE_SIZE = 12
+
+export default async function VideosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>
+}) {
+  const sp = await searchParams
   const supabase = await createClient()
 
   const {
@@ -16,16 +23,16 @@ export default async function VideosPage() {
     redirect('/')
   }
 
-  const { data: collections } = await supabase
-    .from('collections')
-    .select('*, videos(count)')
-    .order('created_at', { ascending: false })
+  const page = Math.max(1, parseInt(sp.page || '1', 10))
+  const from = (page - 1) * PAGE_SIZE
+  const to = from + PAGE_SIZE - 1
 
-  const { data: uncategorizedVideos } = await supabase
-    .from('videos')
-    .select('*')
-    .is('collection_id', null)
-    .order('created_at', { ascending: false })
+  const [{ data: collections }, { data: uncategorizedVideos, count: uncategorizedCount }] = await Promise.all([
+    supabase.from('collections').select('*, videos(count)').order('created_at', { ascending: false }),
+    supabase.from('videos').select('*', { count: 'exact' }).is('collection_id', null).order('created_at', { ascending: false }).range(from, to),
+  ])
+
+  const totalPages = Math.ceil((uncategorizedCount || 0) / PAGE_SIZE)
 
   return (
     <div className="min-h-screen bg-background">
@@ -162,6 +169,32 @@ export default async function VideosPage() {
                 </Link>
               ))}
             </div>
+
+            {totalPages > 1 && (
+              <div className="mt-6 flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Page {page} of {totalPages} &middot; {uncategorizedCount} videos
+                </p>
+                <div className="flex gap-2">
+                  {page > 1 && (
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={page - 1 > 1 ? `/videos?page=${page - 1}` : '/videos'}>
+                        <ChevronLeft className="h-4 w-4 mr-1" />
+                        Previous
+                      </Link>
+                    </Button>
+                  )}
+                  {page < totalPages && (
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/videos?page=${page + 1}`}>
+                        Next
+                        <ChevronRight className="h-4 w-4 ml-1" />
+                      </Link>
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </main>

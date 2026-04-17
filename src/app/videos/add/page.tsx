@@ -9,6 +9,8 @@ import DuckLogo from '@/components/DuckLogo'
 import { ArrowLeft, Save, Video, Tag, Folder, X } from 'lucide-react'
 import Link from 'next/link'
 import { extractYouTubeId, getYouTubeThumbnail } from '@/lib/youtube'
+import { Toast } from '@/components/ui/toast'
+import { useToast } from '@/hooks/use-toast'
 
 export default function AddVideoPage() {
   const router = useRouter()
@@ -25,6 +27,7 @@ export default function AddVideoPage() {
   const [loading, setLoading] = useState(false)
   const [fetchingVideo, setFetchingVideo] = useState(false)
   const [saving, setSaving] = useState(false)
+  const { toast, showToast, dismiss } = useToast()
 
   useEffect(() => {
     loadCollections()
@@ -45,7 +48,7 @@ export default function AddVideoPage() {
     const videoId = extractYouTubeId(url)
 
     if (!videoId) {
-      alert('Invalid YouTube URL')
+      showToast('Invalid YouTube URL', 'error')
       return
     }
 
@@ -72,12 +75,12 @@ export default function AddVideoPage() {
     const videoId = extractYouTubeId(url)
 
     if (!videoId) {
-      alert('Invalid YouTube URL')
+      showToast('Invalid YouTube URL', 'error')
       return
     }
 
     if (!title.trim()) {
-      alert('Please enter a title')
+      showToast('Please enter a title', 'error')
       return
     }
 
@@ -88,7 +91,6 @@ export default function AddVideoPage() {
     } = await supabase.auth.getUser()
 
     if (!user) {
-      alert('You must be logged in')
       router.push('/')
       return
     }
@@ -109,7 +111,7 @@ export default function AddVideoPage() {
     setSaving(false)
 
     if (error) {
-      alert('Failed to add video')
+      showToast('Failed to add video — please try again', 'error')
       return
     }
 
@@ -266,6 +268,7 @@ export default function AddVideoPage() {
           </div>
         </div>
       </main>
+      {toast && <Toast message={toast.message} type={toast.type} onDismiss={dismiss} />}
     </div>
   )
 }

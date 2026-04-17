@@ -3,12 +3,14 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import DuckLogo from '@/components/DuckLogo'
-import { Plus, FileText, Tag, X } from 'lucide-react'
+import { Plus, FileText, Tag, X, ChevronLeft, ChevronRight } from 'lucide-react'
+
+const PAGE_SIZE = 20
 
 export default async function ContentListPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tags?: string }>
+  searchParams: Promise<{ tags?: string; page?: string }>
 }) {
   const sp = await searchParams
 
@@ -23,12 +25,17 @@ export default async function ContentListPage({
   }
 
   const selectedTags = sp.tags ? sp.tags.split(',').filter(Boolean) : []
+  const page = Math.max(1, parseInt(sp.page || '1', 10))
+  const from = (page - 1) * PAGE_SIZE
+  const to = from + PAGE_SIZE - 1
 
+  const baseQuery = supabase.from('content').select('*', { count: 'exact' }).order('updated_at', { ascending: false })
   const contentQuery = selectedTags.length > 0
-    ? supabase.from('content').select('*').overlaps('tags', selectedTags).order('updated_at', { ascending: false })
-    : supabase.from('content').select('*').order('updated_at', { ascending: false })
+    ? baseQuery.overlaps('tags', selectedTags).range(from, to)
+    : baseQuery.range(from, to)
 
-  const { data: content } = await contentQuery
+  const { data: content, count } = await contentQuery
+  const totalPages = Math.ceil((count || 0) / PAGE_SIZE)
 
   const { data: allTags } = await supabase
     .from('content')
@@ -43,6 +50,14 @@ export default async function ContentListPage({
       ? selectedTags.filter((t) => t !== tag)
       : [...selectedTags, tag]
     return next.length > 0 ? `/content?tags=${next.join(',')}` : '/content'
+  }
+
+  const pageUrl = (p: number) => {
+    const params = new URLSearchParams()
+    if (selectedTags.length > 0) params.set('tags', selectedTags.join(','))
+    if (p > 1) params.set('page', String(p))
+    const qs = params.toString()
+    return qs ? `/content?${qs}` : '/content'
   }
 
   return (
@@ -182,6 +197,32 @@ export default async function ContentListPage({
             </div>
           )}
         </div>
+
+        {totalPages > 1 && (
+          <div className="mt-8 flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Page {page} of {totalPages} &middot; {count} articles
+            </p>
+            <div className="flex gap-2">
+              {page > 1 && (
+                <Button variant="outline" size="sm" asChild>
+                  <Link href={pageUrl(page - 1)}>
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Previous
+                  </Link>
+                </Button>
+              )}
+              {page < totalPages && (
+                <Button variant="outline" size="sm" asChild>
+                  <Link href={pageUrl(page + 1)}>
+                    Next
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </Link>
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </main>
     </div>
   )
