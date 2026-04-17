@@ -1,0 +1,39 @@
+# Cloudflare configuration for PeakLearn
+# Used by both Pages and Workers deployments
+# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/
+
+name = "peaklearn"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# ──────────────────────────────────────────
+# Cloudflare Pages (Next.js via next-on-pages)
+# Build output directory for `wrangler pages deploy`
+# ──────────────────────────────────────────
+pages_build_output_dir = ".vercel/output/static"
+
+# ──────────────────────────────────────────
+# Cloudflare Workers (Next.js via next-on-pages workers preset)
+# Uncomment if deploying as a Worker instead of Pages
+# ──────────────────────────────────────────
+# main = ".worker-next/index.mjs"
+# assets = { directory = ".worker-next/assets" }
+
+# Environment variables (non-secret)
+# Secrets must be set via `wrangler secret put` or the Cloudflare dashboard
+[vars]
+NEXT_PUBLIC_SITE_URL = "https://peaklearn.pages.dev"
+
+# Production environment overrides
+[env.production]
+name = "peaklearn-production"
+
+[env.production.vars]
+NEXT_PUBLIC_SITE_URL = "https://peaklearn.pages.dev"
+
+# Preview/staging environment
+[env.preview]
+name = "peaklearn-preview"
+
+[env.preview.vars]
+NEXT_PUBLIC_SITE_URL = "https://preview.peaklearn.pages.dev"
