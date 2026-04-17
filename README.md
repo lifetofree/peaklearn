@@ -1,36 +1,193 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PeakLearn
+
+A personal knowledge management system with video collections, built with Next.js, Supabase, and TipTap.
+
+## Features
+
+- ✨ **Magic Link Authentication** - Passwordless email login
+- 📝 **Rich Text Editor** - Notion-like block editor with TipTap
+- 🎥 **YouTube Video Collections** - Organize clips into playlists
+- 🔍 **Full-text Search** - Search across content and videos
+- 🏷️ **Tags & Categories** - Organize with tags and collections
+- 📊 **Content Versioning** - Track revision history (nice-to-have)
+- 💬 **Comments** - Add annotations to content (nice-to-have)
+
+## Tech Stack
+
+- **Frontend**: Next.js 14 (App Router), TypeScript, Tailwind CSS
+- **Backend**: Supabase (Auth + PostgreSQL + Storage)
+- **Editor**: TipTap (ProseMirror-based)
+- **Video**: react-youtube with privacy-enhanced mode
+- **Hosting**: Vercel
+- **Styling**: Tailwind CSS + shadcn/ui components
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+ installed
+- A Supabase account ([sign up free](https://supabase.com/))
+
+### 1. Clone the repository
+
+```bash
+git clone <repository-url>
+cd peaklearn
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Set up Supabase
+
+1. Go to [supabase.com](https://supabase.com) and create a new project
+2. Wait for the project to be ready (usually 1-2 minutes)
+3. Go to **Settings > API** and copy:
+   - Project URL
+   - anon public key
+
+4. Create the database tables:
+   - Go to **SQL Editor** in Supabase dashboard
+   - Copy the contents of `supabase/migrations/001_initial_schema.sql`
+   - Paste and run the SQL script
+
+5. Configure Email Auth:
+   - Go to **Authentication > Providers**
+   - Enable **Email** provider
+   - Configure email settings (Supabase provides free email service)
+
+### 4. Configure environment variables
+
+Create a `.env.local` file in the root directory:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
+
+### 5. Run the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+peaklearn/
+├── src/
+│   ├── app/                    # Next.js App Router pages
+│   │   ├── auth/              # Authentication pages
+│   │   ├── content/           # Content management
+│   │   ├── videos/            # Video collections
+│   │   ├── search/            # Search page
+│   │   ├── settings/          # User settings
+│   │   ├── dashboard/         # Main dashboard
+│   │   ├── layout.tsx         # Root layout
+│   │   └── globals.css        # Global styles
+│   ├── components/
+│   │   ├── ui/                # UI components (shadcn/ui)
+│   │   ├── editor/            # TipTap editor
+│   │   ├── DuckLogo.tsx       # Logo component
+│   │   └── YouTubeEmbed.tsx   # YouTube player
+│   ├── lib/
+│   │   ├── supabase/          # Supabase client
+│   │   ├── utils.ts           # Utility functions
+│   │   └── youtube.ts         # YouTube utilities
+│   └── types/
+│       └── database.ts        # TypeScript types
+├── supabase/
+│   └── migrations/            # Database migrations
+└── package.json
+```
 
-## Learn More
+## Database Schema
 
-To learn more about Next.js, take a look at the following resources:
+### Tables
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `users` - User profiles (extends Supabase auth)
+- `collections` - Video playlists/collections
+- `videos` - YouTube video clips
+- `content` - Knowledge articles
+- `content_versions` - Content revision history
+- `comments` - Article comments
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Row Level Security (RLS)
 
-## Deploy on Vercel
+All tables have RLS enabled to ensure users can only access their own data.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Pages
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Path | Description |
+|------|-------------|
+| `/` | Login page (magic link) |
+| `/dashboard` | Main dashboard with overview |
+| `/content` | List all articles |
+| `/content/new` | Create new article |
+| `/content/[id]` | View/edit article |
+| `/videos` | Video collections list |
+| `/videos/[collectionId]` | View collection |
+| `/videos/add` | Add new video |
+| `/videos/new-collection` | Create collection |
+| `/search` | Full-text search |
+| `/settings` | User settings |
+
+## Features in Detail
+
+### Magic Link Authentication
+
+- Passwordless email login
+- 15-minute token expiry
+- Single-use tokens for security
+- Automatic user creation on first login
+
+### YouTube Integration
+
+- Privacy-enhanced player (`youtube-nocookie.com`)
+- Auto-fetch video metadata (title, description)
+- Thumbnail support
+- Collections/playlists
+- Tag support
+
+### Content Editor
+
+- Block-based editor (TipTap)
+- Rich text formatting (bold, italic, lists, links)
+- Markdown support
+- Tags and categories
+- Draft/publish workflow
+- Version history tracking
+
+## Deployment
+
+### Vercel
+
+1. Push your code to GitHub
+2. Import project in [Vercel](https://vercel.com)
+3. Add environment variables in Vercel dashboard:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `NEXT_PUBLIC_SITE_URL` (set to your production URL)
+4. Deploy!
+
+### Environment Variables for Production
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+NEXT_PUBLIC_SITE_URL=https://your-domain.com
+```
+
+## License
+
+MIT
+
+## Support
+
+For issues and questions, please open an issue on GitHub.
