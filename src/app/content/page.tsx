@@ -107,10 +107,10 @@ export default async function ContentListPage({
                   <Link
                     key={tag as string}
                     href={toggleTag(tag as string)}
-                    className={`inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-full font-medium transition-colors ${
+                    className={`inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-full font-medium transition-all duration-150 ${
                       isSelected
-                        ? 'bg-primary text-primary-foreground shadow-sm'
-                        : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground border'
+                        ? 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2 ring-offset-background shadow-sm font-semibold'
+                        : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground border border-border'
                     }`}
                   >
                     {isSelected && <X className="h-3 w-3" />}
@@ -149,10 +149,10 @@ export default async function ContentListPage({
                             <Link
                               key={tag}
                               href={toggleTag(tag)}
-                              className={`text-xs px-2.5 py-1 rounded-full transition-colors ${
+                              className={`text-xs px-2.5 py-1 rounded-full transition-all duration-150 ${
                                 isActive
-                                  ? 'bg-primary text-primary-foreground font-semibold shadow-sm'
-                                  : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                                  ? 'bg-primary text-primary-foreground font-semibold ring-2 ring-primary ring-offset-1 ring-offset-background shadow-sm'
+                                  : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground border border-transparent'
                               }`}
                             >
                               {tag}
