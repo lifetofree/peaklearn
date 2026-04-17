@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import DuckLogo from '@/components/DuckLogo'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 
 const isDev = process.env.NODE_ENV === 'development'
 
@@ -86,12 +88,12 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleMagicLink} className="space-y-3">
-          <input
+          <Input
             type="email"
             placeholder="Email address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full h-11 px-4 rounded-md border border-input bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:border-ring focus:ring-2 focus:ring-ring/20 transition-colors duration-150"
+            className="h-11 px-4"
             required
           />
 
@@ -107,25 +109,22 @@ export default function LoginPage() {
             </div>
           )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full h-11 rounded-lg bg-primary text-primary-foreground text-sm font-medium tracking-tight hover:bg-primary/90 active:scale-[0.98] transition-all duration-150 disabled:opacity-50"
-          >
+          <Button type="submit" disabled={loading} size="lg" className="w-full">
             {loading ? 'Sending…' : 'Continue with Email'}
-          </button>
+          </Button>
         </form>
 
         {isDev && process.env.NEXT_PUBLIC_ENABLE_DEV_BYPASS === 'true' && (
           <div className="mt-8 pt-8 border-t border-border">
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={handleDevBypass}
               disabled={loading}
-              className="w-full h-9 rounded-lg border border-border bg-secondary text-secondary-foreground text-xs font-medium hover:bg-secondary/70 transition-colors duration-150 disabled:opacity-50"
+              className="w-full text-xs"
             >
               Dev Bypass
-            </button>
+            </Button>
           </div>
         )}
       </div>

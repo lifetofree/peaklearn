@@ -45,9 +45,7 @@
     --input: 222 35% 18%;
     --ring: 170 60% 42%;
   }
-}
 
-@layer base {
   html {
     scroll-behavior: smooth;
   }
@@ -59,6 +57,7 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+    font-family: var(--font-body), sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -66,23 +65,11 @@
     font-size: 15px;
   }
 
-  body.has-dev-tabbar {
-    padding-top: 3rem;
-  }
-
-  body.has-dev-tabbar-landing {
-    padding-top: 0;
-  }
-
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading), var(--font-body), sans-serif;
     font-weight: 600;
     letter-spacing: -0.025em;
     line-height: 1.2;
-  }
-
-  body {
-    font-family: var(--font-body), sans-serif;
   }
 
   ::selection {

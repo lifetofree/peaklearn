@@ -4,12 +4,40 @@ import DuckLogo from '@/components/DuckLogo'
 import HeaderActions from '@/components/HeaderActions'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import {
   FileText,
   Video,
   Plus,
   Search,
 } from 'lucide-react'
+
+const navLinks = [
+  { href: '/dashboard', label: 'Dashboard' },
+  { href: '/content', label: 'Content' },
+  { href: '/videos', label: 'Videos' },
+  { href: '/search', label: 'Search' },
+]
+
+function NavLinks({ activeHref }: { activeHref: string }) {
+  return (
+    <>
+      {navLinks.map(({ href, label }) => (
+        <a
+          key={href}
+          href={href}
+          className={
+            href === activeHref
+              ? 'text-sm font-medium text-primary bg-accent px-3 py-1.5 rounded-lg whitespace-nowrap'
+              : 'text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap'
+          }
+        >
+          {label}
+        </a>
+      ))}
+    </>
+  )
+}
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -22,22 +50,26 @@ export default async function DashboardPage() {
     redirect('/')
   }
 
-  const { data: recentContent } = await supabase
-    .from('content')
-    .select('*')
-    .order('updated_at', { ascending: false })
-    .limit(5)
-
-  const { data: recentVideos } = await supabase
-    .from('videos')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(5)
-
-  const { data: collections } = await supabase
-    .from('collections')
-    .select('*')
-    .order('created_at', { ascending: false })
+  const [
+    { data: recentContent },
+    { data: recentVideos },
+    { data: collections },
+  ] = await Promise.all([
+    supabase
+      .from('content')
+      .select('id,title,updated_at')
+      .order('updated_at', { ascending: false })
+      .limit(5),
+    supabase
+      .from('videos')
+      .select('id,title,created_at')
+      .order('created_at', { ascending: false })
+      .limit(5),
+    supabase
+      .from('collections')
+      .select('id,title,description')
+      .order('created_at', { ascending: false }),
+  ])
 
   return (
     <div className="min-h-screen bg-background">
@@ -48,59 +80,13 @@ export default async function DashboardPage() {
             <span className="text-base font-semibold tracking-tight">PeakLearn</span>
           </div>
           <nav className="hidden sm:flex items-center gap-0.5">
-            <a
-              href="/dashboard"
-              className="text-sm font-medium text-primary bg-accent px-3 py-1.5 rounded-lg whitespace-nowrap"
-            >
-              Dashboard
-            </a>
-            <a
-              href="/content"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
-            >
-              Content
-            </a>
-            <a
-              href="/videos"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
-            >
-              Videos
-            </a>
-            <a
-              href="/search"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
-            >
-              Search
-            </a>
+            <NavLinks activeHref="/dashboard" />
           </nav>
           <HeaderActions />
         </div>
         <div className="sm:hidden border-t bg-background">
           <div className="container mx-auto px-4 flex items-center gap-0.5 overflow-x-auto py-2">
-            <a
-              href="/dashboard"
-              className="text-sm font-medium text-primary bg-accent px-3 py-1.5 rounded-lg whitespace-nowrap"
-            >
-              Dashboard
-            </a>
-            <a
-              href="/content"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
-            >
-              Content
-            </a>
-            <a
-              href="/videos"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
-            >
-              Videos
-            </a>
-            <a
-              href="/search"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
-            >
-              Search
-            </a>
+            <NavLinks activeHref="/dashboard" />
           </div>
         </div>
       </header>
@@ -142,12 +128,7 @@ export default async function DashboardPage() {
             </CardHeader>
             <CardContent>
               <form action="/search" method="GET">
-                <input
-                  type="text"
-                  name="q"
-                  placeholder="Search..."
-                  className="w-full px-4 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-                />
+                <Input type="text" name="q" placeholder="Search..." />
               </form>
             </CardContent>
           </Card>
