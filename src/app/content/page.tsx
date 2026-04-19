@@ -16,14 +16,6 @@ export default async function ContentListPage({
 
   const supabase = await createClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
-  }
-
   const selectedTags = sp.tags ? sp.tags.split(',').filter(Boolean) : []
   const page = Math.max(1, parseInt(sp.page || '1', 10))
   const from = (page - 1) * PAGE_SIZE

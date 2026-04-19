@@ -90,11 +90,6 @@ export default function AddVideoPage() {
       data: { user },
     } = await supabase.auth.getUser()
 
-    if (!user) {
-      router.push('/login')
-      return
-    }
-
     const thumbnailUrl = getYouTubeThumbnail(videoId, 'high')
 
     const { error } = await supabase.from('videos').insert({
@@ -105,7 +100,7 @@ export default function AddVideoPage() {
       duration,
       tags,
       collection_id: collectionId || null,
-      user_id: user.id,
+      user_id: user?.id || null,
     })
 
     setSaving(false)

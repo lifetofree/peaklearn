@@ -50,10 +50,6 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) {
-    redirect('/login')
-  }
-
   const [
     { data: recentContent },
     { data: recentVideos },

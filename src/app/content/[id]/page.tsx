@@ -23,14 +23,6 @@ export default async function ContentDetailPage({
 
   const supabase = await createClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
-  }
-
   const { data: content } = await supabase
     .from('content')
     .select('*')

@@ -33,15 +33,7 @@ export default function ContentVersionsPage() {
   const [selectedVersion, setSelectedVersion] = useState<ContentVersion | null>(null)
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        router.push('/login')
-        return
-      }
-      loadData()
-    }
-    checkAuth()
+    loadData()
   }, [params.id])
 
   const loadData = async () => {

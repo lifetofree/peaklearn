@@ -11,10 +11,6 @@ export default async function SettingsPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) {
-    redirect('/login')
-  }
-
   const handleSignOut = async () => {
     'use server'
 
@@ -54,29 +50,31 @@ export default async function SettingsPage() {
                   <Mail className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="text-sm text-muted-foreground">Email</p>
-                    <p className="font-medium">{user.email}</p>
+                    <p className="font-medium">{user?.email || 'Not logged in'}</p>
                   </div>
+                 </div>
+               </div>
+             </div>
+
+            {user && (
+              <div className="border rounded-lg p-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  Actions
+                </h3>
+                <div className="space-y-3">
+                  <form action={handleSignOut}>
+                    <button
+                      type="submit"
+                      className="flex items-center gap-2 text-destructive hover:text-destructive/80 transition-colors"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sign out
+                    </button>
+                  </form>
                 </div>
               </div>
-            </div>
-
-            <div className="border rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Actions
-              </h3>
-              <div className="space-y-3">
-                <form action={handleSignOut}>
-                  <button
-                    type="submit"
-                    className="flex items-center gap-2 text-destructive hover:text-destructive/80 transition-colors"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Sign out
-                  </button>
-                </form>
-              </div>
-            </div>
+            )}
 
             <div className="border rounded-lg p-6">
               <h3 className="text-lg font-semibold mb-4">About</h3>

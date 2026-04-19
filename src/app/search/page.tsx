@@ -14,14 +14,6 @@ export default async function SearchPage({
 
   const supabase = await createClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
-  }
-
   const rawQuery = (sp.q || '').trim().slice(0, 100)
 
   let contentResults: Content[] = []

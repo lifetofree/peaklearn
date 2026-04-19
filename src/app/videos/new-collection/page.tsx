@@ -29,18 +29,12 @@ export default function NewCollectionPage() {
       data: { user },
     } = await supabase.auth.getUser()
 
-    if (!user) {
-      alert('You must be logged in')
-      router.push('/login')
-      return
-    }
-
     const { data, error } = await supabase
       .from('collections')
       .insert({
         title,
         description,
-        user_id: user.id,
+        user_id: user?.id || null,
       })
       .select()
       .single()

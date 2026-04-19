@@ -33,12 +33,6 @@ export default function NewContentPage() {
       data: { user },
     } = await supabase.auth.getUser()
 
-    if (!user) {
-      alert('You must be logged in')
-      router.push('/login')
-      return
-    }
-
     const { data, error } = await supabase
       .from('content')
       .insert({
@@ -46,7 +40,7 @@ export default function NewContentPage() {
         body: content || {},
         tags,
         is_published: isPublished,
-        created_by: user.id,
+        created_by: user?.id || null,
         updated_at: new Date().toISOString(),
       })
       .select()
