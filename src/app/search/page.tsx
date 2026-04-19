@@ -19,7 +19,7 @@ export default async function SearchPage({
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/')
+    redirect('/login')
   }
 
   const rawQuery = (sp.q || '').trim().slice(0, 100)

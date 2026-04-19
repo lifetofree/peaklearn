@@ -21,7 +21,7 @@ export default async function ContentListPage({
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/')
+    redirect('/login')
   }
 
   const selectedTags = sp.tags ? sp.tags.split(',').filter(Boolean) : []

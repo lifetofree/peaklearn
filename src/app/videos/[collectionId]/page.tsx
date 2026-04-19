@@ -20,7 +20,7 @@ export default async function VideoCollectionPage({
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/')
+    redirect('/login')
   }
 
   const { data: collection } = await supabase

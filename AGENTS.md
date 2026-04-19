@@ -9,7 +9,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ## Project Stage
 
 **Alpha — personal use, single-user.**
-Core CRUD is functional. Theme is finalized (teal, minimal). No collaboration, no public sharing. Active backlog tracked in `BACKLOGS.md`. Changelog in `CHANGELOGS.md`. Open security issues tracked in `REVIEWS.md` — read that before touching auth or search.
+Core CRUD is functional. Theme is finalized (light-mode glassmorphic teal). No collaboration, no public sharing. Active backlog tracked in `BACKLOGS.md`. Changelog in `CHANGELOGS.md`. Open security issues tracked in `REVIEWS.md` — read that before touching auth or search.
 
 ## Project Overview
 
@@ -42,6 +42,8 @@ npm run lint     # ESLint (no separate typecheck script)
 src/
 ├── app/
 │   ├── auth/callback/page.tsx          # Server: exchanges magic link code for session
+│   ├── login/page.tsx                  # Client: login page (magic link email form)
+│   ├── page.tsx                        # Server: redirects to dashboard (auth) or login (unauth)
 │   ├── content/
 │   │   ├── [id]/
 │   │   │   ├── page.tsx               # Server: view article (read-only)
@@ -63,7 +65,6 @@ src/
 │   │   ├── new-collection/page.tsx   # Client: create collection
 │   │   └── page.tsx                  # Server: list all collections + uncategorized videos
 │   ├── layout.tsx                     # Root layout (Inter + Space Grotesk fonts, globals.css)
-│   ├── page.tsx                       # Login page (magic link email form)
 │   └── globals.css                    # CSS variables (light/dark themes, teal primary)
 ├── components/
 │   ├── ui/
@@ -125,7 +126,8 @@ src/
 ### Dashboard
 - Recent content (5), recent videos (5), all collections
 - Quick search bar
-- Sticky header with inline desktop nav + collapsible mobile sub-bar
+- Fully mobile-first, responsive layouts integrating glassmorphic styling
+- Sticky responsive header (search collapses to toggle down on mobile)
 
 ## Database Schema
 
@@ -227,9 +229,9 @@ if (tagQuery) {
 ## Theme
 
 - **Primary:** teal `hsl(170 74% 32%)` ≈ `#158C78`
-- **Radius:** `0.5rem` (`--radius`)
+- **Radius:** `0.75rem` (`--radius`)
 - **Fonts:** Inter (body, `--font-body`), Space Grotesk (headings, `--font-heading`)
-- **Dark mode:** `.dark` class on `<html>`, toggled manually — CSS variables are ready but no toggle button yet
+- **Styling Specs:** Pure light-mode focused. Built with premium utility classes (`.glass`, `.glass-card`) for backdrop blur, unified CSS variable colors (`globals.css`), and smooth micro-animations.
 - All colors referenced via CSS custom properties — change `globals.css` to retheme globally
 
 ## Environment Variables
@@ -266,7 +268,6 @@ See `BACKLOGS.md` for the full prioritized list.
 | Feature | Where | Notes |
 |---------|-------|-------|
 | Video duration | `videos.duration`, `src/lib/youtube.ts` | `parseIsoDuration()` ready — call during oEmbed fetch |
-| Dark mode | `globals.css` `.dark` class | Add toggle button to `HeaderActions.tsx` |
 
 ### Not started
 - Pagination (will break at scale — all rows fetched today)

@@ -31,7 +31,7 @@ export default function NewCollectionPage() {
 
     if (!user) {
       alert('You must be logged in')
-      router.push('/')
+      router.push('/login')
       return
     }
 

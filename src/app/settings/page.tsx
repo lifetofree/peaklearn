@@ -12,7 +12,7 @@ export default async function SettingsPage() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/')
+    redirect('/login')
   }
 
   const handleSignOut = async () => {
@@ -20,7 +20,7 @@ export default async function SettingsPage() {
 
     const supabase = await createClient()
     await supabase.auth.signOut()
-    redirect('/')
+    redirect('/login')
   }
 
   return (

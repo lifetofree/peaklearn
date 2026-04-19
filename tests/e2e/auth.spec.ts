@@ -17,26 +17,20 @@ test.describe('Authentication', () => {
 
   test('shows magic link button', async ({ page }) => {
     await page.goto('/')
-    await expect(page.getByRole('button', { name: /send magic link/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /continue with email/i })).toBeVisible()
   })
 
   test('shows dev bypass form in development', async ({ page }) => {
     await page.goto('/')
-    // Dev bypass section should be visible
-    const devSection = page.getByText(/dev login/i)
+    const devSection = page.getByText(/dev bypass/i)
     await expect(devSection).toBeVisible()
   })
 
   test('dev bypass login navigates to dashboard', async ({ page }) => {
     await page.goto('/')
-    // Fill dev bypass credentials
-    const emailInputs = page.getByRole('textbox', { name: /email/i })
-    const passwordInput = page.getByRole('textbox', { name: /password/i })
-    const devLoginBtn = page.getByRole('button', { name: /dev login/i })
+    const devLoginBtn = page.getByRole('button', { name: /dev bypass/i })
 
     if (await devLoginBtn.isVisible()) {
-      await emailInputs.last().fill(DEV_EMAIL)
-      await passwordInput.fill(DEV_PASSWORD)
       await devLoginBtn.click()
       await page.waitForURL('**/dashboard', { timeout: 10_000 })
       await expect(page).toHaveURL(/dashboard/)

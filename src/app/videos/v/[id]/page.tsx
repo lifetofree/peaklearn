@@ -21,7 +21,7 @@ export default async function VideoDetailPage({
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/')
+    redirect('/login')
   }
 
   const { data: video } = await supabase

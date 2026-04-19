@@ -35,7 +35,7 @@ export default function NewContentPage() {
 
     if (!user) {
       alert('You must be logged in')
-      router.push('/')
+      router.push('/login')
       return
     }
 

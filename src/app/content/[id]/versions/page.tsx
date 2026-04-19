@@ -36,7 +36,7 @@ export default function ContentVersionsPage() {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        router.push('/')
+        router.push('/login')
         return
       }
       loadData()

@@ -28,7 +28,7 @@ export default async function ContentDetailPage({
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/')
+    redirect('/login')
   }
 
   const { data: content } = await supabase

@@ -20,7 +20,7 @@ export default async function VideosPage({
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/')
+    redirect('/login')
   }
 
   const page = Math.max(1, parseInt(sp.page || '1', 10))
