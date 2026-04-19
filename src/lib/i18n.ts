@@ -1,0 +1,188 @@
+type TranslationDict = Record<string, string>
+
+const translations: TranslationDict = {
+  // Common
+  'common.site_name': 'PeakLearn',
+  'common.loading': 'Loading...',
+  'common.saving': 'Saving...',
+  'common.back_to_content': 'Back to Content',
+  'common.back_to_videos': 'Back to Videos',
+  'common.back_to_collections': 'Back to Collections',
+  'common.cancel': 'Cancel',
+  'common.save': 'Save',
+  'common.add': 'Add',
+  'common.edit': 'Edit',
+  'common.delete': 'Delete',
+  'common.search': 'Search',
+  'common.search_placeholder': 'Search...',
+  'common.clear_search': 'Clear search',
+  'common.history': 'History',
+  'common.restore': 'Restore',
+  'common.restore_success': 'Restored successfully',
+  'common.restore_failed': 'Failed to restore version',
+  'common.created': 'Created',
+  'common.last_updated': 'Last updated',
+  'common.version': 'Version',
+  'common.view': 'View',
+
+  // Navigation
+  'nav.dashboard': 'Dashboard',
+  'nav.content': 'Content',
+  'nav.videos': 'Videos',
+  'nav.search': 'Search',
+  'nav.settings': 'Settings',
+  'nav.sign_out': 'Sign out',
+
+  // Dashboard
+  'dashboard.welcome': 'Welcome back.',
+  'dashboard.subtitle': 'Your knowledge base at a glance.',
+  'dashboard.quick_search': 'Quick Search',
+  'dashboard.quick_search_subtitle': 'Search across all your content and videos',
+  'dashboard.recent_content': 'Recent Content',
+  'dashboard.recent_content_subtitle': 'Your latest articles',
+  'dashboard.recent_videos': 'Recent Videos',
+  'dashboard.recent_videos_subtitle': 'Your latest clips',
+  'dashboard.video_collections': 'Video Collections',
+  'dashboard.video_collections_subtitle': 'Your playlists',
+  'dashboard.new_article': 'New Article',
+  'dashboard.add_video': 'Add Video',
+
+  // Auth
+  'auth.title': 'PeakLearn',
+  'auth.subtitle': 'Your knowledge base, sharpened.',
+  'auth.email_placeholder': 'Email address',
+  'auth.continue': 'Continue with Email',
+  'auth.sending': 'Sending...',
+  'auth.check_email': 'Check your email for the magic link',
+  'auth.magic_link_error': 'Failed to send magic link',
+  'auth.dev_bypass': 'Dev Login',
+  'auth.dev_not_configured': 'Dev bypass credentials not configured',
+  'auth.dev_bypass_failed': 'Dev bypass failed',
+  'auth.must_be_logged_in': 'You must be logged in',
+
+  // Content List
+  'content.list_title': 'Content',
+  'content.list_subtitle': 'Manage your knowledge base articles',
+  'content.filter_by_tags': 'Filter by tags',
+  'content.clear_all': 'Clear all',
+  'content.no_content': 'No content yet',
+  'content.create_first': 'Create your first article',
+  'content.last_updated_label': 'Last updated:',
+
+  // Content Detail
+  'content.delete_confirm': 'Are you sure you want to delete this content?',
+
+  // Content Edit
+  'content.new_title': 'New Article',
+  'content.edit_title': 'Edit Article',
+  'content.title_label': 'Title',
+  'content.title_placeholder': 'Enter article title...',
+  'content.tags_label': 'Tags',
+  'content.tags_placeholder': 'Add a tag...',
+  'content.publish_label': 'Publish',
+  'content.save_success': 'Saved successfully',
+  'content.save_failed': 'Failed to save — please try again',
+  'content.create_failed': 'Failed to create content',
+  'content.enter_title': 'Please enter a title',
+
+  // Content Versions
+  'versions.title': 'Version History',
+  'versions.subtitle': 'View and restore previous versions',
+  'versions.no_versions': 'No versions yet',
+  'versions.current_version': 'Current version',
+  'versions.restore_button': 'Restore this version',
+  'versions.view_button': 'View this version',
+
+  // Videos
+  'videos.title': 'Video Collections',
+  'videos.subtitle': 'Organize and manage your YouTube clips',
+  'videos.new_collection': 'New Collection',
+  'videos.add_video': 'Add Video',
+  'videos.no_collections': 'No collections yet',
+  'videos.no_collections_subtitle': 'Create collections to organize your videos',
+  'videos.create_collection': 'Create Collection',
+  'videos.uncategorized': 'Uncategorized Videos',
+  'videos.uncategorized_subtitle': 'Videos not assigned to any collection',
+  'videos.videos_count': '{count} videos',
+  'videos.page_of': 'Page {page} of {total} · {count} videos',
+  'videos.previous': 'Previous',
+  'videos.next': 'Next',
+
+  // Video Add
+  'video.add_title': 'Add Video',
+  'video.url_label': 'YouTube URL',
+  'video.url_placeholder': 'https://www.youtube.com/watch?v=...',
+  'video.fetch_info': 'Fetch Info',
+  'video.fetching': 'Fetching...',
+  'video.title_label': 'Title',
+  'video.title_placeholder': 'Enter video title...',
+  'video.description_label': 'Description',
+  'video.description_placeholder': 'Video description (optional)...',
+  'video.collection_label': 'Collection',
+  'video.select_collection': 'Select a collection (optional)',
+  'video.invalid_url': 'Invalid YouTube URL',
+  'video.enter_title': 'Please enter a video title',
+  'video.add_failed': 'Failed to add video — please try again',
+
+  // Video Detail
+  'video.detail_title': 'Video Details',
+
+  // Video Edit
+  'video.edit_title': 'Edit Video',
+  'video.move_collection': 'Move to collection',
+  'video.remove_collection': 'Remove from collection',
+  'video.update_failed': 'Failed to update video — please try again',
+
+  // Collection
+  'collection.edit_title': 'Edit Collection',
+  'collection.title_label': 'Title',
+  'collection.title_placeholder': 'Enter collection title...',
+  'collection.description_label': 'Description',
+  'collection.description_placeholder': 'Collection description (optional)...',
+  'collection.delete': 'Delete Collection',
+  'collection.delete_confirm': 'Are you sure you want to delete this collection? Videos will not be deleted.',
+  'collection.save_failed': 'Failed to save collection — please try again',
+  'collection.enter_title': 'Please enter a collection title',
+
+  // New Collection
+  'collection.new_title': 'Create New Collection',
+
+  // Search
+  'search.title': 'Search results for "{query}"',
+  'search.results_count': '{count} results found',
+  'search.no_results': 'No results found for "{query}"',
+  'search.empty': 'Enter a search term to find content and videos',
+  'search.content': 'Content ({count})',
+  'search.videos': 'Videos ({count})',
+
+  // Settings
+  'settings.title': 'Settings',
+  'settings.subtitle': 'Manage your account and preferences',
+  'settings.profile': 'Profile',
+  'settings.email_label': 'Email',
+  'settings.actions': 'Actions',
+  'settings.about': 'About',
+  'settings.version': 'PeakLearn v1.0.0',
+  'settings.about_description': 'A personal knowledge management system with video collections.',
+  'settings.about_tech': 'Built with Next.js, Supabase, and TipTap.',
+
+  // Toast
+  'toast.error': 'Error',
+  'toast.success': 'Success',
+  'toast.dismiss': 'Dismiss',
+
+  // Tags
+  'tags.placeholder': 'Add a tag...',
+}
+
+export function t(key: string, params?: Record<string, string | number>): string {
+  let value = translations[key] || key
+  
+  if (params) {
+    Object.entries(params).forEach(([k, v]) => {
+      value = value.replace(`{${k}}`, String(v))
+    })
+  }
+  
+  return value
+}

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import DuckLogo from '@/components/DuckLogo'
 import HeaderActions from '@/components/HeaderActions'
 import { Search } from 'lucide-react'
+import { t } from '@/lib/i18n'
 
 interface HeaderProps {
   showSearch?: boolean
@@ -16,7 +17,7 @@ export default function Header({ showSearch = false, searchValue = '' }: HeaderP
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <Link href="/dashboard" className="flex items-center gap-2.5">
           <DuckLogo />
-          <span className="text-base font-semibold tracking-tight">PeakLearn</span>
+          <span className="text-base font-semibold tracking-tight">{t('common.site_name')}</span>
         </Link>
         {showSearch && (
           <form action="/search" method="GET" className="relative">
@@ -25,7 +26,7 @@ export default function Header({ showSearch = false, searchValue = '' }: HeaderP
               type="text"
               name="q"
               defaultValue={searchValue}
-              placeholder="Search..."
+              placeholder={t('common.search_placeholder')}
               className="pl-10 pr-10 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-ring w-64 md:w-96"
             />
           </form>

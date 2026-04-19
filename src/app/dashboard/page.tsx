@@ -11,15 +11,16 @@ import {
   Search,
 } from 'lucide-react'
 import type { Content, Video as VideoType, Collection } from '@/types/database'
+import { t } from '@/lib/i18n'
 
 type RecentContent = Pick<Content, 'id' | 'title' | 'updated_at'>
 type RecentVideo = Pick<VideoType, 'id' | 'title' | 'created_at'>
 
 const navLinks = [
-  { href: '/dashboard', label: 'Dashboard' },
-  { href: '/content', label: 'Content' },
-  { href: '/videos', label: 'Videos' },
-  { href: '/search', label: 'Search' },
+  { href: '/dashboard', label: 'nav.dashboard' },
+  { href: '/content', label: 'nav.content' },
+  { href: '/videos', label: 'nav.videos' },
+  { href: '/search', label: 'nav.search' },
 ]
 
 function NavLinks({ activeHref }: { activeHref: string }) {
@@ -35,7 +36,7 @@ function NavLinks({ activeHref }: { activeHref: string }) {
               : 'text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap'
           }
         >
-          {label}
+          {t(label)}
         </a>
       ))}
     </>
@@ -84,22 +85,22 @@ export default async function DashboardPage() {
       <main className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-7">
           <div>
-            <h2 className="text-2xl font-semibold">Welcome back.</h2>
+            <h2 className="text-2xl font-semibold">{t('dashboard.welcome')}</h2>
             <p className="text-muted-foreground mt-1 text-sm">
-              Your knowledge base at a glance.
+              {t('dashboard.subtitle')}
             </p>
           </div>
           <div className="flex gap-3">
             <Button variant="outline" asChild>
               <a href="/content/new">
                 <Plus className="h-4 w-4 mr-2" />
-                New Article
+                {t('dashboard.new_article')}
               </a>
             </Button>
             <Button asChild>
               <a href="/videos">
                 <Video className="h-4 w-4 mr-2" />
-                Add Video
+                {t('dashboard.add_video')}
               </a>
             </Button>
           </div>
@@ -110,15 +111,15 @@ export default async function DashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Search className="h-5 w-5" />
-                Quick Search
+                {t('dashboard.quick_search')}
               </CardTitle>
               <CardDescription>
-                Search across all your content and videos
+                {t('dashboard.quick_search_subtitle')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form action="/search" method="GET">
-                <Input type="text" name="q" placeholder="Search..." />
+                <Input type="text" name="q" placeholder={t('common.search_placeholder')} />
               </form>
             </CardContent>
           </Card>
@@ -127,9 +128,9 @@ export default async function DashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                Recent Content
+                {t('dashboard.recent_content')}
               </CardTitle>
-              <CardDescription>Your latest articles</CardDescription>
+              <CardDescription>{t('dashboard.recent_content_subtitle')}</CardDescription>
             </CardHeader>
             <CardContent>
               {recentContent && recentContent.length > 0 ? (
@@ -150,7 +151,7 @@ export default async function DashboardPage() {
                 </ul>
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  No content yet. Create your first article!
+                  {t('content.no_content')}
                 </p>
               )}
             </CardContent>
@@ -160,9 +161,9 @@ export default async function DashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Video className="h-5 w-5" />
-                Recent Videos
+                {t('dashboard.recent_videos')}
               </CardTitle>
-              <CardDescription>Your latest clips</CardDescription>
+              <CardDescription>{t('dashboard.recent_videos_subtitle')}</CardDescription>
             </CardHeader>
             <CardContent>
               {recentVideos && recentVideos.length > 0 ? (
@@ -183,7 +184,7 @@ export default async function DashboardPage() {
                 </ul>
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  No videos yet. Add your first clip!
+                  {t('videos.no_videos')}
                 </p>
               )}
             </CardContent>
@@ -191,8 +192,8 @@ export default async function DashboardPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Video Collections</CardTitle>
-              <CardDescription>Your playlists</CardDescription>
+              <CardTitle>{t('dashboard.video_collections')}</CardTitle>
+              <CardDescription>{t('dashboard.video_collections_subtitle')}</CardDescription>
             </CardHeader>
             <CardContent>
               {collections && collections.length > 0 ? (
@@ -215,7 +216,7 @@ export default async function DashboardPage() {
                 </ul>
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  No collections yet. Create your first playlist!
+                  {t('videos.no_collections')}
                 </p>
               )}
             </CardContent>
