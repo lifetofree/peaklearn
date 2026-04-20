@@ -1,5 +1,6 @@
--- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- Enable UUID extension (for older PostgreSQL versions)
+-- Note: PostgreSQL 13+ has gen_random_uuid() built-in
+-- We'll use gen_random_uuid() by default for better compatibility
 
 -- Create users table (extends auth.users with additional fields)
 CREATE TABLE IF NOT EXISTS public.users (
@@ -11,7 +12,7 @@ CREATE TABLE IF NOT EXISTS public.users (
 
 -- Create collections table
 CREATE TABLE IF NOT EXISTS public.collections (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   title TEXT NOT NULL,
   description TEXT,
   user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
@@ -20,7 +21,7 @@ CREATE TABLE IF NOT EXISTS public.collections (
 
 -- Create videos table
 CREATE TABLE IF NOT EXISTS public.videos (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   youtube_url TEXT NOT NULL,
   title TEXT NOT NULL,
   description TEXT,
@@ -34,7 +35,7 @@ CREATE TABLE IF NOT EXISTS public.videos (
 
 -- Create content table
 CREATE TABLE IF NOT EXISTS public.content (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   title TEXT NOT NULL,
   body JSONB NOT NULL DEFAULT '{}',
   tags TEXT[] DEFAULT '{}',
@@ -45,7 +46,7 @@ CREATE TABLE IF NOT EXISTS public.content (
 
 -- Create content_versions table (for versioning)
 CREATE TABLE IF NOT EXISTS public.content_versions (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   content_id UUID REFERENCES public.content(id) ON DELETE CASCADE,
   body JSONB NOT NULL,
   version_number INTEGER NOT NULL,
@@ -54,7 +55,7 @@ CREATE TABLE IF NOT EXISTS public.content_versions (
 
 -- Create comments table (optional)
 CREATE TABLE IF NOT EXISTS public.comments (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   content_id UUID REFERENCES public.content(id) ON DELETE CASCADE,
   body TEXT NOT NULL,
   created_by UUID REFERENCES public.users(id) ON DELETE CASCADE,
