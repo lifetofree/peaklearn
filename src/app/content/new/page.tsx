@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import DuckLogo from '@/components/DuckLogo'
-import Editor from '@/components/editor/Editor'
+import EditorWrapper from '@/components/editor/EditorWrapper'
 import { ArrowLeft, Save, X, Tag } from 'lucide-react'
 import Link from 'next/link'
 
@@ -17,7 +17,7 @@ export default function NewContentPage() {
   const supabase = createClient()
 
   const [title, setTitle] = useState('')
-  const [content, setContent] = useState<any>(null)
+  const [content, setContent] = useState<any>({})
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState('')
   const [isPublished, setIsPublished] = useState(false)
@@ -39,7 +39,7 @@ export default function NewContentPage() {
       .from('content')
       .insert({
         title,
-        body: content || {},
+        body: content,
         tags,
         is_published: isPublished,
         created_by: user?.id || null,
@@ -149,7 +149,7 @@ export default function NewContentPage() {
 
             <div>
               <label className="text-sm font-medium mb-2 block">Content</label>
-              <Editor
+              <EditorWrapper
                 content={content}
                 onChange={setContent}
                 editable={true}

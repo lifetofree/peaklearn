@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import DuckLogo from '@/components/DuckLogo'
-import Editor from '@/components/editor/Editor'
+import EditorWrapper from '@/components/editor/EditorWrapper'
 import { ArrowLeft, Save, X, Tag, History } from 'lucide-react'
 import Link from 'next/link'
 import { Toast } from '@/components/ui/toast'
@@ -209,7 +209,7 @@ export default function ContentEditPage() {
 
             <div>
               <label className="text-sm font-medium mb-2 block">Content</label>
-              <Editor
+              <EditorWrapper
                 content={content}
                 onChange={setContent}
                 editable={true}
