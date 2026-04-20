@@ -1,12 +1,14 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 
+export const runtime = 'edge'
+
 export default async function AuthCallbackPage({
   searchParams,
 }: {
-  searchParams: { code?: string }
+  searchParams: Promise<{ code?: string }>
 }) {
-  const code = searchParams.code
+  const { code } = await searchParams
 
   if (!code) {
     redirect('/login?error=missing_code')
