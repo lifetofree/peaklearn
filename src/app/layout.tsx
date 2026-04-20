@@ -33,7 +33,7 @@ export default function RootLayout({
         <div className="flex-1">{children}</div>
         <footer className="border-t py-4">
           <p className="text-center text-xs text-muted-foreground">
-            Powered by Adduckivity
+            Powered by Adduckivity · v{process.env.npm_package_version ?? '0.1.0'}
           </p>
         </footer>
       </body>

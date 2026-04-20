@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import DuckLogo from '@/components/DuckLogo'
-import HeaderActions from '@/components/HeaderActions'
+import Header from '@/components/Header'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -11,12 +10,17 @@ import {
   Plus,
   Search,
 } from 'lucide-react'
+import type { Content, Video as VideoType, Collection } from '@/types/database'
+import { t } from '@/lib/i18n'
+
+type RecentContent = Pick<Content, 'id' | 'title' | 'updated_at'>
+type RecentVideo = Pick<VideoType, 'id' | 'title' | 'created_at'>
 
 const navLinks = [
-  { href: '/dashboard', label: 'Dashboard' },
-  { href: '/content', label: 'Content' },
-  { href: '/videos', label: 'Videos' },
-  { href: '/search', label: 'Search' },
+  { href: '/dashboard', label: 'nav.dashboard' },
+  { href: '/content', label: 'nav.content' },
+  { href: '/videos', label: 'nav.videos' },
+  { href: '/search', label: 'nav.search' },
 ]
 
 function NavLinks({ activeHref }: { activeHref: string }) {
@@ -32,7 +36,7 @@ function NavLinks({ activeHref }: { activeHref: string }) {
               : 'text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap'
           }
         >
-          {label}
+          {t(label)}
         </a>
       ))}
     </>
@@ -46,10 +50,6 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) {
-    redirect('/')
-  }
-
   const [
     { data: recentContent },
     { data: recentVideos },
@@ -59,57 +59,44 @@ export default async function DashboardPage() {
       .from('content')
       .select('id,title,updated_at')
       .order('updated_at', { ascending: false })
-      .limit(5),
+      .limit(5)
+      .returns<RecentContent[]>(),
     supabase
       .from('videos')
       .select('id,title,created_at')
       .order('created_at', { ascending: false })
-      .limit(5),
+      .limit(5)
+      .returns<RecentVideo[]>(),
     supabase
       .from('collections')
       .select('id,title,description')
-      .order('created_at', { ascending: false }),
+      .order('created_at', { ascending: false })
+      .returns<Collection[]>(),
   ])
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-background/95 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <DuckLogo />
-            <span className="text-base font-semibold tracking-tight">PeakLearn</span>
-          </div>
-          <nav className="hidden sm:flex items-center gap-0.5">
-            <NavLinks activeHref="/dashboard" />
-          </nav>
-          <HeaderActions />
-        </div>
-        <div className="sm:hidden border-t bg-background">
-          <div className="container mx-auto px-4 flex items-center gap-0.5 overflow-x-auto py-2">
-            <NavLinks activeHref="/dashboard" />
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <main className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-7">
           <div>
-            <h2 className="text-2xl font-semibold">Welcome back.</h2>
+            <h2 className="text-2xl font-semibold">{t('dashboard.welcome')}</h2>
             <p className="text-muted-foreground mt-1 text-sm">
-              Your knowledge base at a glance.
+              {t('dashboard.subtitle')}
             </p>
           </div>
           <div className="flex gap-3">
             <Button variant="outline" asChild>
               <a href="/content/new">
                 <Plus className="h-4 w-4 mr-2" />
-                New Article
+                {t('dashboard.new_article')}
               </a>
             </Button>
             <Button asChild>
               <a href="/videos">
                 <Video className="h-4 w-4 mr-2" />
-                Add Video
+                {t('dashboard.add_video')}
               </a>
             </Button>
           </div>
@@ -120,15 +107,15 @@ export default async function DashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Search className="h-5 w-5" />
-                Quick Search
+                {t('dashboard.quick_search')}
               </CardTitle>
               <CardDescription>
-                Search across all your content and videos
+                {t('dashboard.quick_search_subtitle')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form action="/search" method="GET">
-                <Input type="text" name="q" placeholder="Search..." />
+                <Input type="text" name="q" placeholder={t('common.search_placeholder')} />
               </form>
             </CardContent>
           </Card>
@@ -137,14 +124,14 @@ export default async function DashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                Recent Content
+                {t('dashboard.recent_content')}
               </CardTitle>
-              <CardDescription>Your latest articles</CardDescription>
+              <CardDescription>{t('dashboard.recent_content_subtitle')}</CardDescription>
             </CardHeader>
             <CardContent>
               {recentContent && recentContent.length > 0 ? (
                 <ul className="space-y-3">
-                  {recentContent.map((item: any) => (
+                  {recentContent.map((item: RecentContent) => (
                     <li key={item.id}>
                       <a
                         href={`/content/${item.id}`}
@@ -160,7 +147,7 @@ export default async function DashboardPage() {
                 </ul>
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  No content yet. Create your first article!
+                  {t('content.no_content')}
                 </p>
               )}
             </CardContent>
@@ -170,14 +157,14 @@ export default async function DashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Video className="h-5 w-5" />
-                Recent Videos
+                {t('dashboard.recent_videos')}
               </CardTitle>
-              <CardDescription>Your latest clips</CardDescription>
+              <CardDescription>{t('dashboard.recent_videos_subtitle')}</CardDescription>
             </CardHeader>
             <CardContent>
               {recentVideos && recentVideos.length > 0 ? (
                 <ul className="space-y-3">
-                  {recentVideos.map((video: any) => (
+                  {recentVideos.map((video: RecentVideo) => (
                     <li key={video.id}>
                       <a
                         href={`/videos/v/${video.id}`}
@@ -193,7 +180,7 @@ export default async function DashboardPage() {
                 </ul>
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  No videos yet. Add your first clip!
+                  {t('videos.no_videos')}
                 </p>
               )}
             </CardContent>
@@ -201,13 +188,13 @@ export default async function DashboardPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Video Collections</CardTitle>
-              <CardDescription>Your playlists</CardDescription>
+              <CardTitle>{t('dashboard.video_collections')}</CardTitle>
+              <CardDescription>{t('dashboard.video_collections_subtitle')}</CardDescription>
             </CardHeader>
             <CardContent>
               {collections && collections.length > 0 ? (
                 <ul className="space-y-3">
-                  {collections.map((collection: any) => (
+                  {collections.map((collection: Collection) => (
                     <li key={collection.id}>
                       <a
                         href={`/videos/${collection.id}`}
@@ -225,7 +212,7 @@ export default async function DashboardPage() {
                 </ul>
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  No collections yet. Create your first playlist!
+                  {t('videos.no_collections')}
                 </p>
               )}
             </CardContent>

@@ -6,13 +6,11 @@ import {
   FileText,
   Video,
   Search,
-  Plus,
 } from 'lucide-react'
 
 const tabs = [
   { href: '/dashboard', label: 'Home', icon: LayoutDashboard },
   { href: '/content', label: 'Content', icon: FileText },
-  { href: '/content/new', label: 'New', icon: Plus },
   { href: '/videos', label: 'Videos', icon: Video },
   { href: '/search', label: 'Search', icon: Search },
 ]
@@ -34,11 +32,7 @@ export default function DevTabBar() {
         {tabs.map(({ href, label, icon: Icon }) => {
           const isActive =
             pathname === href ||
-            (href !== '/dashboard' && pathname.startsWith(href + '/')) ||
-            (href === '/content/new' && pathname === '/content/new') ||
-            (href === '/content' &&
-              pathname.startsWith('/content') &&
-              pathname !== '/content/new')
+            (href !== '/dashboard' && pathname.startsWith(href + '/'))
 
           return (
             <a

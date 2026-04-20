@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import DuckLogo from '@/components/DuckLogo'
 import Editor from '@/components/editor/Editor'
-import { ArrowLeft, Save, X, Tag } from 'lucide-react'
+import { ArrowLeft, Save, X, Tag, History } from 'lucide-react'
 import Link from 'next/link'
+import { Toast } from '@/components/ui/toast'
+import { useToast } from '@/hooks/use-toast'
 
 export default function ContentEditPage() {
   const params = useParams()
@@ -17,11 +19,13 @@ export default function ContentEditPage() {
 
   const [title, setTitle] = useState('')
   const [content, setContent] = useState<any>(null)
+  const [originalContent, setOriginalContent] = useState<any>(null)
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState('')
   const [isPublished, setIsPublished] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const { toast, showToast, dismiss } = useToast()
 
   useEffect(() => {
     loadContent()
@@ -41,6 +45,7 @@ export default function ContentEditPage() {
 
     setTitle(data.title)
     setContent(data.body)
+    setOriginalContent(data.body)
     setTags(data.tags || [])
     setIsPublished(data.is_published)
     setLoading(false)
@@ -48,6 +53,28 @@ export default function ContentEditPage() {
 
   const handleSave = async () => {
     setSaving(true)
+
+    if (originalContent) {
+      const { data: versionData } = await supabase
+        .from('content_versions')
+        .select('version_number')
+        .eq('content_id', params.id)
+        .order('version_number', { ascending: false })
+        .limit(1)
+        .single()
+
+      const nextVersion = versionData ? (versionData.version_number || 0) + 1 : 1
+
+      const { error: versionError } = await supabase.from('content_versions').insert({
+        content_id: params.id,
+        body: originalContent,
+        version_number: nextVersion,
+      })
+
+      if (versionError) {
+        console.error('Failed to save version:', versionError)
+      }
+    }
 
     const { error } = await supabase
       .from('content')
@@ -63,11 +90,12 @@ export default function ContentEditPage() {
     setSaving(false)
 
     if (error) {
-      alert('Failed to save content')
+      showToast('Failed to save — please try again', 'error')
       return
     }
 
-    router.push(`/content/${params.id}`)
+    setOriginalContent(content)
+    showToast('Saved successfully')
   }
 
   const addTag = () => {
@@ -98,6 +126,13 @@ export default function ContentEditPage() {
             <h1 className="text-2xl font-bold">PeakLearn</h1>
           </Link>
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => router.push(`/content/${params.id}/versions`)}
+            >
+              History
+              <History className="h-4 w-4 ml-2" />
+            </Button>
             <Button
               variant="outline"
               onClick={() => router.push(`/content/${params.id}`)}
@@ -194,6 +229,7 @@ export default function ContentEditPage() {
           </div>
         </div>
       </main>
+      {toast && <Toast message={toast.message} type={toast.type} onDismiss={dismiss} />}
     </div>
   )
 }

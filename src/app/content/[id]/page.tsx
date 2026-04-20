@@ -3,8 +3,16 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import DuckLogo from '@/components/DuckLogo'
-import { ArrowLeft, Edit, Trash2, FileText } from 'lucide-react'
+import { ArrowLeft, Edit, Trash2, History } from 'lucide-react'
 import EditorWrapper from '@/components/editor/EditorWrapper'
+
+async function deleteContent(formData: FormData) {
+  'use server'
+  const id = formData.get('id') as string
+  const supabase = await createClient()
+  await supabase.from('content').delete().eq('id', id)
+  redirect('/content')
+}
 
 export default async function ContentDetailPage({
   params,
@@ -14,14 +22,6 @@ export default async function ContentDetailPage({
   const { id } = await params
 
   const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/')
-  }
 
   const { data: content } = await supabase
     .from('content')
@@ -64,9 +64,17 @@ export default async function ContentDetailPage({
                   <Edit className="h-4 w-4" />
                 </Link>
               </Button>
-              <Button variant="outline" size="icon">
-                <Trash2 className="h-4 w-4 text-destructive" />
+              <Button variant="outline" size="icon" asChild>
+                <Link href={`/content/${content.id}/versions`}>
+                  <History className="h-4 w-4" />
+                </Link>
               </Button>
+              <form action={deleteContent}>
+                <input type="hidden" name="id" value={content.id} />
+                <Button type="submit" variant="outline" size="icon">
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </form>
             </div>
           </div>
 

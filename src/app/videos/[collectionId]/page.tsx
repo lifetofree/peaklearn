@@ -15,14 +15,6 @@ export default async function VideoCollectionPage({
 
   const supabase = await createClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/')
-  }
-
   const { data: collection } = await supabase
     .from('collections')
     .select('*')

@@ -152,6 +152,22 @@ CREATE POLICY "Users can create own content versions"
     AND content.created_by = auth.uid()
   ));
 
+CREATE POLICY "Users can update own content versions"
+  ON public.content_versions FOR UPDATE
+  USING (EXISTS (
+    SELECT 1 FROM public.content
+    WHERE content.id = content_versions.content_id
+    AND content.created_by = auth.uid()
+  ));
+
+CREATE POLICY "Users can delete own content versions"
+  ON public.content_versions FOR DELETE
+  USING (EXISTS (
+    SELECT 1 FROM public.content
+    WHERE content.id = content_versions.content_id
+    AND content.created_by = auth.uid()
+  ));
+
 -- RLS Policies for comments
 CREATE POLICY "Users can view own comments"
   ON public.comments FOR SELECT

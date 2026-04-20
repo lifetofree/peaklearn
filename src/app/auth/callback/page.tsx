@@ -9,7 +9,7 @@ export default async function AuthCallbackPage({
   const code = searchParams.code
 
   if (!code) {
-    redirect('/?error=missing_code')
+    redirect('/login?error=missing_code')
   }
 
   const supabase = await createClient()
@@ -17,7 +17,7 @@ export default async function AuthCallbackPage({
   const { error } = await supabase.auth.exchangeCodeForSession(code)
 
   if (error) {
-    redirect('/?error=auth_failed')
+    redirect('/login?error=auth_failed')
   }
 
   redirect('/dashboard')

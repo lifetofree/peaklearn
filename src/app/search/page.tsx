@@ -1,25 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import DuckLogo from '@/components/DuckLogo'
-import { Search, FileText, Video, X } from 'lucide-react'
-
-function sanitizeForLike(input: string): string {
-  return input
-    .slice(0, 100)
-    .replace(/[%_()\[\]{}^'"\\;]/g, (match) => '\\' + match)
-}
-
-function sanitizeForJson(input: string): string {
-  return input
-    .slice(0, 100)
-    .replace(/'/g, "'")
-    .replace(/"/g, '"')
-    .replace(/;/g, '')
-    .replace(/--/g, '')
-    .replace(/\\/g, '\\\\')
-    .replace(/\x00/g, '')
-}
+import Header from '@/components/Header'
+import { FileText, Video, X } from 'lucide-react'
+import type { Content, Video as VideoType } from '@/types/database'
 
 export default async function SearchPage({
   searchParams,
@@ -30,75 +14,58 @@ export default async function SearchPage({
 
   const supabase = await createClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const rawQuery = (sp.q || '').trim().slice(0, 100)
 
-  if (!user) {
-    redirect('/')
-  }
-
-  const rawQuery = sp.q || ''
-  const sanitizedQuery = sanitizeForJson(rawQuery)
-  const safeQuery = sanitizeForLike(rawQuery)
-
-  let contentResults: any[] = []
-  let videoResults: any[] = []
+  let contentResults: Content[] = []
+  let videoResults: VideoType[] = []
 
   if (rawQuery) {
-    const [contentRes, videoRes] = await Promise.all([
-      supabase
-        .from('content')
-        .select('*')
-        .or(`title.ilike.%${safeQuery}%,tags.cs.{${safeQuery}}`)
-        .order('updated_at', { ascending: false }),
-
-      supabase
-        .from('videos')
-        .select('*')
-        .or(`title.ilike.%${safeQuery}%,description.ilike.%${safeQuery}%,tags.cs.{${safeQuery}}`)
-        .order('created_at', { ascending: false }),
+    const [
+      { data: contentByTitle },
+      { data: contentByTag },
+      { data: videosByTitle },
+      { data: videosByDesc },
+      { data: videosByTag },
+    ] = await Promise.all([
+      supabase.from('content').select('id,title,tags,updated_at,is_published,body,created_by').ilike('title', `%${rawQuery}%`).order('updated_at', { ascending: false }),
+      supabase.from('content').select('id,title,tags,updated_at,is_published,body,created_by').contains('tags', [rawQuery]).order('updated_at', { ascending: false }),
+      supabase.from('videos').select('id,title,description,tags,thumbnail_url,youtube_url,collection_id,user_id,created_at,duration').ilike('title', `%${rawQuery}%`).order('created_at', { ascending: false }),
+      supabase.from('videos').select('id,title,description,tags,thumbnail_url,youtube_url,collection_id,user_id,created_at,duration').ilike('description', `%${rawQuery}%`).order('created_at', { ascending: false }),
+      supabase.from('videos').select('id,title,description,tags,thumbnail_url,youtube_url,collection_id,user_id,created_at,duration').contains('tags', [rawQuery]).order('created_at', { ascending: false }),
     ])
 
-    contentResults = contentRes.data || []
-    videoResults = videoRes.data || []
+    const seenContent = new Set<string>()
+    contentResults = [...(contentByTitle || []), ...(contentByTag || [])].filter(
+      (item) => !seenContent.has(item.id) && !!seenContent.add(item.id)
+    ) as Content[]
+
+    const seenVideos = new Set<string>()
+    videoResults = [...(videosByTitle || []), ...(videosByDesc || []), ...(videosByTag || [])].filter(
+      (item) => !seenVideos.has(item.id) && !!seenVideos.add(item.id)
+    ) as VideoType[]
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center gap-3">
-            <DuckLogo />
-            <h1 className="text-2xl font-bold">PeakLearn</h1>
+      <Header showSearch searchValue={rawQuery} />
+      {rawQuery && (
+        <div className="container mx-auto px-4 py-2">
+          <Link
+            href="/search"
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+            Clear search
           </Link>
-          <form action="/search" method="GET" className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              type="text"
-              name="q"
-              defaultValue={sanitizedQuery}
-              placeholder="Search..."
-              className="pl-10 pr-10 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-ring w-64 md:w-96"
-            />
-            {rawQuery && (
-              <Link
-                href="/search"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-4 w-4" />
-              </Link>
-            )}
-          </form>
         </div>
-      </header>
+      )}
 
       <main className="container mx-auto px-4 py-8">
         {rawQuery ? (
           <div>
             <div className="mb-8">
               <h2 className="text-2xl font-bold mb-2">
-                Search results for &ldquo;{sanitizedQuery}&rdquo;
+                Search results for &ldquo;{rawQuery}&rdquo;
               </h2>
               <p className="text-muted-foreground">
                 {contentResults.length + videoResults.length} results found
@@ -176,7 +143,7 @@ export default async function SearchPage({
 
             {contentResults.length === 0 && videoResults.length === 0 && (
               <div className="text-center py-12 text-muted-foreground">
-                <p>No results found for &ldquo;{sanitizedQuery}&rdquo;</p>
+                <p>No results found for &ldquo;{rawQuery}&rdquo;</p>
               </div>
             )}
           </div>
