@@ -28,7 +28,7 @@ concurrency:
 
 jobs:
   deploy:
-    name: Build & Deploy to Workers
+    name: Build & Deploy to Pages
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -56,9 +56,10 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
 
-      - name: Deploy to Cloudflare Workers
+      - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy --env production
+          wranglerVersion: '4'
+          command: pages deploy .vercel/output/static --project-name=peaklearn --commit-dirty=true
