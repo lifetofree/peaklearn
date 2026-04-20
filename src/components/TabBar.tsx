@@ -21,8 +21,8 @@ export default function TabBar() {
   if (pathname === '/') return null
 
   return (
-    <div className="sticky top-6 z-50 h-9 border-b bg-background/90 backdrop-blur">
-      <div className="flex items-center justify-center h-full max-w-md mx-auto gap-1">
+    <div className="w-full border-b bg-background/95 backdrop-blur-sm">
+      <div className="flex items-center justify-center h-14 max-w-md mx-auto gap-1">
         {tabs.map(({ href, label, icon: Icon }) => {
           const isActive =
             pathname === href ||
@@ -32,13 +32,13 @@ export default function TabBar() {
             <a
               key={href}
               href={href}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+              className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                 isActive
                   ? 'bg-primary text-primary-foreground'
                   : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
               }`}
             >
-              <Icon className="h-3.5 w-3.5" />
+              <Icon className="h-4 w-4" />
               <span>{label}</span>
             </a>
           )
