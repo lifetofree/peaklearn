@@ -1,25 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 
 export const runtime = 'edge'
 import Link from 'next/link'
 import DuckLogo from '@/components/DuckLogo'
-import { Settings, LogOut, User, Mail } from 'lucide-react'
+import { Settings, User, Mail } from 'lucide-react'
 
 export default async function SettingsPage() {
   const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  const handleSignOut = async () => {
-    'use server'
-
-    const supabase = await createClient()
-    await supabase.auth.signOut()
-    redirect('/login')
-  }
+  const { data: { user } } = await supabase.auth.getUser()
 
   return (
     <div className="min-h-screen bg-background">
@@ -52,31 +40,11 @@ export default async function SettingsPage() {
                   <Mail className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="text-sm text-muted-foreground">Email</p>
-                    <p className="font-medium">{user?.email || 'Not logged in'}</p>
+                    <p className="font-medium">{user?.email || 'Demo Mode - No Authentication'}</p>
                   </div>
                  </div>
-               </div>
-             </div>
-
-            {user && (
-              <div className="border rounded-lg p-6">
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  Actions
-                </h3>
-                <div className="space-y-3">
-                  <form action={handleSignOut}>
-                    <button
-                      type="submit"
-                      className="flex items-center gap-2 text-destructive hover:text-destructive/80 transition-colors"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Sign out
-                    </button>
-                  </form>
                 </div>
               </div>
-            )}
 
             <div className="border rounded-lg p-6">
               <h3 className="text-lg font-semibold mb-4">About</h3>

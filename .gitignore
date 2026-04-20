@@ -79,3 +79,6 @@ test-results/
 .windsurf/
 .zencoder/
 skills/
+
+# Seed scripts
+seed_*.js

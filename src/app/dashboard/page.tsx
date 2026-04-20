@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 
 export const runtime = 'edge'
 import Header from '@/components/Header'
@@ -47,10 +46,6 @@ function NavLinks({ activeHref }: { activeHref: string }) {
 
 export default async function DashboardPage() {
   const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
 
   const [
     { data: recentContent },
