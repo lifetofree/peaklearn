@@ -15,16 +15,10 @@ const tabs = [
   { href: '/search', label: 'Search', icon: Search },
 ]
 
-function isLocalOrDev() {
-  if (process.env.NODE_ENV === 'development') return true
-  const host = typeof window !== 'undefined' ? window.location.hostname : ''
-  return host === 'localhost' || host === '127.0.0.1'
-}
-
-export default function DevTabBar() {
+export default function TabBar() {
   const pathname = usePathname()
 
-  if (!isLocalOrDev() || pathname === '/') return null
+  if (pathname === '/') return null
 
   return (
     <div className="sticky top-6 z-50 h-9 border-b bg-background/90 backdrop-blur">

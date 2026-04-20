@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import DevBanner from "@/components/DevBanner";
-import DevTabBar from "@/components/DevTabBar";
+import TabBar from "@/components/TabBar";
 import "./globals.css";
 
 const inter = Inter({
@@ -29,7 +29,7 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <body className="min-h-screen flex flex-col bg-background text-foreground font-body antialiased">
         {process.env.NODE_ENV === 'development' && <DevBanner />}
-        <DevTabBar />
+        <TabBar />
         <div className="flex-1">{children}</div>
         <footer className="border-t py-4">
           <p className="text-center text-xs text-muted-foreground">
