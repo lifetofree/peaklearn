@@ -21,7 +21,7 @@ export default function TabBar() {
   if (pathname === '/') return null
 
   return (
-    <div className="sticky top-0 z-10 w-full border-b bg-background/95 backdrop-blur-sm">
+    <div className="sticky top-0 z-20 w-full border-b bg-background/95 backdrop-blur-sm">
       <div className="flex items-center justify-center h-14 max-w-md mx-auto gap-1">
         {tabs.map(({ href, label, icon: Icon }) => {
           const isActive =
