@@ -30,6 +30,7 @@
     { "pattern": "peaklearn.adduckivity.com/*", "zone_name": "adduckivity.com" }
   ],
   "vars": {
-    "NEXT_PUBLIC_SITE_URL": "https://peaklearn.adduckivity.com"
+    "NEXT_PUBLIC_SITE_URL": "https://peaklearn.adduckivity.com",
+    "ENABLE_DEV_BYPASS": "true"
   }
 }
