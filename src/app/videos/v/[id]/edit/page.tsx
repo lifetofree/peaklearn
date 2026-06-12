@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 
-export const runtime = 'edge'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,9 +12,9 @@ import Link from 'next/link'
 import { Toast } from '@/components/ui/toast'
 import { useToast } from '@/hooks/use-toast'
 import { useTagInput } from '@/hooks/useTagInput'
+import { useCollections } from '@/hooks/useCollections'
+import { useUnsavedChangesGuard, confirmDiscardChanges } from '@/hooks/useUnsavedChangesGuard'
 import { toErrorMessage } from '@/lib/errors'
-
-type CollectionOption = { id: string; title: string }
 
 export default function EditVideoPage() {
   const params = useParams()
@@ -23,15 +22,30 @@ export default function EditVideoPage() {
   const supabase = createClient()
 
   const [title, setTitle] = useState('')
+  const [originalTitle, setOriginalTitle] = useState('')
   const [description, setDescription] = useState('')
+  const [originalDescription, setOriginalDescription] = useState('')
   const [collectionId, setCollectionId] = useState('')
-  const [collections, setCollections] = useState<CollectionOption[]>([])
+  const [originalCollectionId, setOriginalCollectionId] = useState('')
+  const collections = useCollections()
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [notFound, setNotFound] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
   const { toast, showToast, dismiss } = useToast()
   const { tags, setTags, tagInput, setTagInput, addTag, removeTag } = useTagInput()
+  const [originalTags, setOriginalTags] = useState<string[]>([])
+
+  const tagsEqual = (a: string[], b: string[]) =>
+    a.length === b.length && a.every((t, i) => t === b[i])
+
+  const isDirty =
+    title !== originalTitle ||
+    description !== originalDescription ||
+    collectionId !== originalCollectionId ||
+    !tagsEqual(tags, originalTags)
+
+  useUnsavedChangesGuard(isDirty)
 
   useEffect(() => {
     const init = async () => {
@@ -42,22 +56,26 @@ export default function EditVideoPage() {
       }
       setUserId(user.id)
 
-      const [videoRes, colRes] = await Promise.all([
-        supabase.from('videos').select('*').eq('id', params.id).eq('user_id', user.id).single(),
-        supabase.from('collections').select('id, title').eq('user_id', user.id).order('title'),
-      ])
+      const { data: video, error: videoError } = await supabase
+        .from('videos')
+        .select('*')
+        .eq('id', params.id)
+        .eq('user_id', user.id)
+        .single()
 
-      if (videoRes.error || !videoRes.data) {
+      if (videoError || !video) {
         setNotFound(true)
         return
       }
 
-      setTitle(videoRes.data.title)
-      setDescription(videoRes.data.description || '')
-      setTags(videoRes.data.tags || [])
-      setCollectionId(videoRes.data.collection_id || '')
-
-      if (colRes.data) setCollections(colRes.data)
+      setTitle(video.title)
+      setOriginalTitle(video.title)
+      setDescription(video.description || '')
+      setOriginalDescription(video.description || '')
+      setTags(video.tags || [])
+      setOriginalTags(video.tags || [])
+      setCollectionId(video.collection_id || '')
+      setOriginalCollectionId(video.collection_id || '')
     }
 
     init()
@@ -91,6 +109,11 @@ export default function EditVideoPage() {
     } finally {
       setSaving(false)
     }
+  }
+
+  const handleBack = () => {
+    if (isDirty && !confirmDiscardChanges()) return
+    router.push(`/videos/v/${params.id}`)
   }
 
   const handleDelete = async () => {
@@ -156,7 +179,13 @@ export default function EditVideoPage() {
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           <Link
-            href={`/videos/v/${params.id}`}
+            href={isDirty ? '#' : `/videos/v/${params.id}`}
+            onClick={(e) => {
+              if (isDirty) {
+                e.preventDefault()
+                handleBack()
+              }
+            }}
             className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mb-6"
           >
             <ArrowLeft className="h-4 w-4" />

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 
-export const runtime = 'edge'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import DuckLogo from '@/components/DuckLogo'
@@ -39,11 +38,7 @@ export default function ContentVersionsPage() {
   const [selectedVersion, setSelectedVersion] = useState<ContentVersion | null>(null)
   const { toast, showToast, dismiss } = useToast()
 
-  useEffect(() => {
-    loadData()
-  }, [params.id])
-
-  const loadData = async () => {
+  async function loadData() {
     const [contentRes, versionsRes] = await Promise.all([
       supabase
         .from('content')
@@ -66,6 +61,10 @@ export default function ContentVersionsPage() {
     setVersions(versionsRes.data || [])
     setLoading(false)
   }
+
+  useEffect(() => {
+    loadData()
+  }, [params.id])
 
   const handleRestore = async (version: ContentVersion) => {
     if (!confirm(`Restore to version ${version.version_number}? This will create a new version with the current content first.`)) {

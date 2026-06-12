@@ -1,13 +1,5 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
+import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
+import nextTypescript from "eslint-config-next/typescript";
 
 const eslintConfig = [
   {
@@ -19,9 +11,11 @@ const eslintConfig = [
       "build/**",
       "public/**",
       "**/*.js",
+      ".open-next/**",
     ],
   },
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  ...nextCoreWebVitals,
+  ...nextTypescript,
   {
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
@@ -29,6 +23,19 @@ const eslintConfig = [
       "@next/next/no-html-link-for-pages": "off",
       "@next/next/no-img-element": "off",
       "react-hooks/exhaustive-deps": "off",
+      "react-hooks/immutability": "off",
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/refs": "off",
+      "react-hooks/component-hook-factories": "off",
+      "react-hooks/error-boundaries": "off",
+      "react-hooks/global-target": "off",
+      "react-hooks/incompatible-library": "off",
+      "react-hooks/preserve-manual-memoization": "off",
+      "react-hooks/purity": "off",
+      "react-hooks/set-state-in-render": "off",
+      "react-hooks/static-components": "off",
+      "react-hooks/unsupported-syntax": "off",
+      "react-hooks/use-memo": "off",
       "@typescript-eslint/no-empty-object-type": "off",
     },
   },

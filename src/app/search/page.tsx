@@ -4,6 +4,7 @@ import Header from '@/components/Header'
 import { FileText, Video, X } from 'lucide-react'
 import type { Content, Video as VideoType } from '@/types/database'
 
+
 type SearchContent = Pick<Content, 'id' | 'title' | 'tags' | 'updated_at' | 'is_published' | 'created_by'>
 
 function dedup<T extends { id: string }>(arrays: (T[] | null)[]): T[] {

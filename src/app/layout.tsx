@@ -29,7 +29,7 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <body className="min-h-screen flex flex-col bg-background text-foreground font-body antialiased">
         {process.env.NODE_ENV === 'development' && <DevBanner />}
-        {process.env.NODE_ENV === 'development' && <DevTabBar />}
+        <TabBar />
         <div className="flex-1">{children}</div>
         <footer className="border-t py-3">
           <p className="container mx-auto px-4 text-xs text-muted-foreground/50">

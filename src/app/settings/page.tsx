@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
 
-export const runtime = 'edge'
 import Link from 'next/link'
 import DuckLogo from '@/components/DuckLogo'
 import { Settings, User, Mail } from 'lucide-react'

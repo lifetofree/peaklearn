@@ -1,8 +1,7 @@
 'use client'
 
-export const runtime = 'edge'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -14,9 +13,8 @@ import { extractYouTubeId, getYouTubeThumbnail } from '@/lib/youtube'
 import { Toast } from '@/components/ui/toast'
 import { useToast } from '@/hooks/use-toast'
 import { useTagInput } from '@/hooks/useTagInput'
+import { useCollections } from '@/hooks/useCollections'
 import { toErrorMessage } from '@/lib/errors'
-
-type CollectionOption = { id: string; title: string }
 
 export default function AddVideoPage() {
   const router = useRouter()
@@ -27,25 +25,12 @@ export default function AddVideoPage() {
   const [description, setDescription] = useState('')
   const [duration, setDuration] = useState(0)
   const [collectionId, setCollectionId] = useState('')
-  const [collections, setCollections] = useState<CollectionOption[]>([])
+  const collections = useCollections()
   const { tags, tagInput, setTagInput, addTag, removeTag } = useTagInput()
   const [loading, setLoading] = useState(false)
   const [fetchingVideo, setFetchingVideo] = useState(false)
   const [saving, setSaving] = useState(false)
   const { toast, showToast, dismiss } = useToast()
-
-  useEffect(() => {
-    loadCollections()
-  }, [])
-
-  const loadCollections = async () => {
-    const { data } = await supabase
-      .from('collections')
-      .select('id, title')
-      .order('title')
-
-    if (data) setCollections(data)
-  }
 
   const fetchVideoInfo = async () => {
     const videoId = extractYouTubeId(url)

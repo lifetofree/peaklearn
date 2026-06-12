@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 
-export const runtime = 'edge'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,6 +13,7 @@ import Link from 'next/link'
 import { Toast } from '@/components/ui/toast'
 import { useToast } from '@/hooks/use-toast'
 import { useTagInput } from '@/hooks/useTagInput'
+import { useUnsavedChangesGuard, confirmDiscardChanges } from '@/hooks/useUnsavedChangesGuard'
 import { toErrorMessage } from '@/lib/errors'
 
 export default function ContentEditPage() {
@@ -24,6 +24,9 @@ export default function ContentEditPage() {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState<any>(null)
   const [originalContent, setOriginalContent] = useState<any>(null)
+  const [originalTitle, setOriginalTitle] = useState('')
+  const [originalIsPublished, setOriginalIsPublished] = useState(false)
+  const [originalTags, setOriginalTags] = useState<string[]>([])
   const [isPublished, setIsPublished] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -31,11 +34,18 @@ export default function ContentEditPage() {
   const { toast, showToast, dismiss } = useToast()
   const { tags, setTags, tagInput, setTagInput, addTag, removeTag } = useTagInput()
 
-  useEffect(() => {
-    loadContent()
-  }, [params.id])
+  const tagsEqual = (a: string[], b: string[]) =>
+    a.length === b.length && a.every((t, i) => t === b[i])
 
-  const loadContent = async () => {
+  const isDirty =
+    title !== originalTitle ||
+    content !== originalContent ||
+    isPublished !== originalIsPublished ||
+    !tagsEqual(tags, originalTags)
+
+  useUnsavedChangesGuard(isDirty)
+
+  async function loadContent() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       router.push('/login')
@@ -58,10 +68,17 @@ export default function ContentEditPage() {
     setTitle(data.title)
     setContent(data.body)
     setOriginalContent(data.body)
+    setOriginalTitle(data.title)
     setTags(data.tags || [])
+    setOriginalTags(data.tags || [])
     setIsPublished(data.is_published)
+    setOriginalIsPublished(data.is_published)
     setLoading(false)
   }
+
+  useEffect(() => {
+    loadContent()
+  }, [params.id])
 
   const handleSave = async () => {
     if (!userId) {
@@ -113,7 +130,15 @@ export default function ContentEditPage() {
     }
 
     setOriginalContent(content)
+    setOriginalTitle(title)
+    setOriginalIsPublished(isPublished)
+    setOriginalTags([...tags])
     showToast('Saved successfully')
+  }
+
+  const handleCancel = () => {
+    if (isDirty && !confirmDiscardChanges()) return
+    router.push(`/content/${params.id}`)
   }
 
   if (loading) {
@@ -142,7 +167,7 @@ export default function ContentEditPage() {
             </Button>
             <Button
               variant="outline"
-              onClick={() => router.push(`/content/${params.id}`)}
+              onClick={handleCancel}
             >
               Cancel
             </Button>

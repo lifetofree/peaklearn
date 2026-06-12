@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 
-export const runtime = 'edge'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,6 +11,7 @@ import { ArrowLeft, Save, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { Toast } from '@/components/ui/toast'
 import { useToast } from '@/hooks/use-toast'
+import { useUnsavedChangesGuard, confirmDiscardChanges } from '@/hooks/useUnsavedChangesGuard'
 import { toErrorMessage } from '@/lib/errors'
 
 export default function EditCollectionPage() {
@@ -20,12 +20,17 @@ export default function EditCollectionPage() {
   const supabase = createClient()
 
   const [title, setTitle] = useState('')
+  const [originalTitle, setOriginalTitle] = useState('')
   const [description, setDescription] = useState('')
+  const [originalDescription, setOriginalDescription] = useState('')
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [notFound, setNotFound] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
   const { toast, showToast, dismiss } = useToast()
+
+  const isDirty = title !== originalTitle || description !== originalDescription
+  useUnsavedChangesGuard(isDirty)
 
   const loadCollection = async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -48,7 +53,9 @@ export default function EditCollectionPage() {
     }
 
     setTitle(data.title)
+    setOriginalTitle(data.title)
     setDescription(data.description || '')
+    setOriginalDescription(data.description || '')
   }
 
   useEffect(() => {
