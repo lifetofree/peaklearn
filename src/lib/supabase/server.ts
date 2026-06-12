@@ -1,17 +1,18 @@
 import { cookies } from 'next/headers'
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
-import { getRequestContext } from '@cloudflare/next-on-pages'
+import { getCloudflareContext } from '@opennextjs/cloudflare'
 
 function getSupabaseEnv() {
   // Prefer Cloudflare runtime bindings so the correct values are always used
   // regardless of what was baked into the bundle at build time.
   try {
-    const env = getRequestContext().env as Record<string, string | undefined>
-    const url = env.NEXT_PUBLIC_SUPABASE_URL
-    const key = env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    const { env } = getCloudflareContext()
+    const cfEnv = env as Record<string, string | undefined>
+    const url = cfEnv.NEXT_PUBLIC_SUPABASE_URL
+    const key = cfEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY
     if (url && key) return { url, key }
   } catch {
-    // getRequestContext throws outside of a Cloudflare Workers request context
+    // getCloudflareContext throws outside of a Cloudflare Workers request context
     // (e.g. local dev with `next dev`). Fall through to process.env.
   }
 

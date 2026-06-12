@@ -1,18 +1,18 @@
 # Deploy to Cloudflare Pages
 #
+# NOTE: This workflow requires @cloudflare/next-on-pages, which conflicts with
+# @opennextjs/cloudflare (used for Workers deploys). To re-enable Pages CI,
+# re-add @cloudflare/next-on-pages to package.json and accept the Workers CI
+# breaking. For now, deploy Pages locally with:
+#   npm install --save-dev @cloudflare/next-on-pages
+#   npm run build:cloudflare && npx wrangler pages deploy .vercel/output/static --project-name=peaklearn --branch=production
+#
+# Or use the OpenNext Cloudflare Workers deployment (wrangler.jsonc) which is
+# the recommended path going forward.
+#
 # Required GitHub Secrets (Settings → Secrets → Actions):
 #   CLOUDFLARE_API_TOKEN   — API token with "Cloudflare Pages: Edit" permission
 #   CLOUDFLARE_ACCOUNT_ID  — Found in Cloudflare dashboard → right sidebar
-#
-# Required environment variables in Cloudflare Pages project settings:
-#   NEXT_PUBLIC_SUPABASE_URL
-#   NEXT_PUBLIC_SUPABASE_ANON_KEY
-#   NEXT_PUBLIC_SITE_URL
-#
-# First-time setup:
-#   1. Install adapter: npm install -D @cloudflare/next-on-pages
-#   2. Create the Pages project in Cloudflare dashboard (or via wrangler CLI)
-#   3. Add the secrets above to GitHub repo settings
 
 name: Deploy to Cloudflare Pages
 
@@ -50,7 +50,7 @@ jobs:
         run: npm install --legacy-peer-deps
 
       - name: Build for Cloudflare Pages
-        run: npm run build:cloudflare
+        run: npm install --save-dev @cloudflare/next-on-pages && npx @cloudflare/next-on-pages
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
@@ -58,4 +58,4 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '4'
-          command: pages deploy .vercel/output/static --project-name=peaklearn --commit-dirty=true
+          command: pages deploy .vercel/output/static --project-name=peaklearn --branch=production --commit-dirty=true

@@ -1,18 +1,8 @@
-# Deploy to Cloudflare Workers
+# Deploy to Cloudflare Workers via OpenNext
 #
 # Required GitHub Secrets (Settings → Secrets → Actions):
 #   CLOUDFLARE_API_TOKEN   — API token with "Workers Scripts: Edit" permission
 #   CLOUDFLARE_ACCOUNT_ID  — Found in Cloudflare dashboard → right sidebar
-#
-# Required Cloudflare Worker secrets (set via wrangler or dashboard):
-#   wrangler secret put NEXT_PUBLIC_SUPABASE_URL
-#   wrangler secret put NEXT_PUBLIC_SUPABASE_ANON_KEY
-#   wrangler secret put NEXT_PUBLIC_SITE_URL
-#
-# First-time setup:
-#   1. Install adapter: npm install -D @cloudflare/next-on-pages
-#   2. Uncomment the Workers fields in wrangler.toml (main + assets)
-#   3. Add the secrets above to GitHub repo settings
 
 name: Deploy to Cloudflare Workers
 
@@ -28,7 +18,7 @@ concurrency:
 
 jobs:
   deploy:
-    name: Build & Deploy to Pages
+    name: Build & Deploy to Workers
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -49,13 +39,8 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
-      - name: Build for Cloudflare Workers
-        run: npm run build:cloudflare
-
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          wranglerVersion: '4'
-          command: pages deploy .vercel/output/static --project-name=peaklearn --commit-dirty=true
+      - name: Build and deploy with OpenNext
+        run: npm run deploy:worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

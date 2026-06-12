@@ -15,7 +15,8 @@
 
 # next.js
 /.next/
-/out/
+/.out/
+/.open-next/
 
 # production
 /build
@@ -82,3 +83,7 @@ skills/
 
 # Seed scripts
 seed_*.js
+
+# Tooling cache
+.wrangler/
+playwright-report/
