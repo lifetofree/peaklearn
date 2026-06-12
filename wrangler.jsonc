@@ -31,6 +31,8 @@
   ],
   "vars": {
     "NEXT_PUBLIC_SITE_URL": "https://peaklearn.adduckivity.com",
+    "NEXT_PUBLIC_SUPABASE_URL": "https://eekbgarscbkrfyzhndpp.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_CgVtmVVKwiyD2KTAS749rg_hwkHsV-y",
     "ENABLE_DEV_BYPASS": "true"
   }
 }
