@@ -55,7 +55,7 @@ describe('Button', () => {
 
   it('applies lg size class', () => {
     render(<Button size="lg">Large</Button>)
-    expect(screen.getByRole('button')).toHaveClass('h-11')
+    expect(screen.getByRole('button')).toHaveClass('h-10')
   })
 
   it('applies icon size class', () => {

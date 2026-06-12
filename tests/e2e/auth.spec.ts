@@ -1,12 +1,12 @@
 import { test, expect } from '@playwright/test'
 
-// E2E Auth tests — require dev bypass env vars to be set:
+// E2E Auth tests — require dev bypass env vars to be set in .env.local:
 //   NEXT_PUBLIC_ENABLE_DEV_BYPASS=true
-//   NEXT_PUBLIC_DEV_BYPASS_EMAIL=dev@example.com
-//   NEXT_PUBLIC_DEV_BYPASS_PASSWORD=password
+//   DEV_BYPASS_EMAIL=dev@peaklearn.local
+//   DEV_BYPASS_PASSWORD=password123
 
-const DEV_EMAIL = process.env.NEXT_PUBLIC_DEV_BYPASS_EMAIL || 'dev@example.com'
-const DEV_PASSWORD = process.env.NEXT_PUBLIC_DEV_BYPASS_PASSWORD || 'password'
+const DEV_EMAIL = 'dev@peaklearn.local'
+const DEV_PASSWORD = 'password123'
 
 test.describe('Authentication', () => {
   test('login page loads and shows email form', async ({ page }) => {
@@ -41,16 +41,16 @@ test.describe('Authentication', () => {
 
   test('unauthenticated user is redirected from dashboard to login', async ({ page }) => {
     await page.goto('/dashboard')
-    await expect(page).toHaveURL('/')
+    await expect(page).toHaveURL('/login')
   })
 
   test('unauthenticated user is redirected from content to login', async ({ page }) => {
     await page.goto('/content')
-    await expect(page).toHaveURL('/')
+    await expect(page).toHaveURL('/login')
   })
 
   test('unauthenticated user is redirected from videos to login', async ({ page }) => {
     await page.goto('/videos')
-    await expect(page).toHaveURL('/')
+    await expect(page).toHaveURL('/login')
   })
 })
