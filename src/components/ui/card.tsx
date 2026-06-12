@@ -7,10 +7,7 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export const Card: FC<CardProps> = ({ className, children, ...props }) => (
   <div
-    className={cn(
-      'rounded-lg border border-border bg-card shadow-[0_1px_4px_0_rgb(0_0_0/0.06)]',
-      className
-    )}
+    className={cn('rounded-xl border border-border bg-card', className)}
     {...props}
   >
     {children}
@@ -18,25 +15,29 @@ export const Card: FC<CardProps> = ({ className, children, ...props }) => (
 )
 
 export const CardHeader: FC<CardProps> = ({ className, children, ...props }) => (
-  <div className={cn('p-6 pb-0', className)} {...props}>
+  <div className={cn('px-5 pt-5 pb-0', className)} {...props}>
     {children}
   </div>
 )
 
-export const CardTitle: FC<React.HTMLAttributes<HTMLHeadingElement>> = ({ className, children, ...props }) => (
-  <h3 className={cn('text-base font-semibold tracking-tight', className)} {...props}>
+export const CardTitle: FC<React.HTMLAttributes<HTMLHeadingElement>> = ({
+  className, children, ...props
+}) => (
+  <h3 className={cn('text-sm font-semibold tracking-tight', className)} {...props}>
     {children}
   </h3>
 )
 
-export const CardDescription: FC<React.HTMLAttributes<HTMLParagraphElement>> = ({ className, children, ...props }) => (
-  <p className={cn('text-sm text-muted-foreground mt-1', className)} {...props}>
+export const CardDescription: FC<React.HTMLAttributes<HTMLParagraphElement>> = ({
+  className, children, ...props
+}) => (
+  <p className={cn('text-xs text-muted-foreground mt-0.5', className)} {...props}>
     {children}
   </p>
 )
 
 export const CardContent: FC<CardProps> = ({ className, children, ...props }) => (
-  <div className={cn('p-6 pt-4', className)} {...props}>
+  <div className={cn('px-5 py-4', className)} {...props}>
     {children}
   </div>
 )
