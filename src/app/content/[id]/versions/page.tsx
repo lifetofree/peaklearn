@@ -9,6 +9,10 @@ import { Button } from '@/components/ui/button'
 import DuckLogo from '@/components/DuckLogo'
 import { ArrowLeft, History, RotateCcw, Eye } from 'lucide-react'
 import Link from 'next/link'
+import { Toast } from '@/components/ui/toast'
+import { useToast } from '@/hooks/use-toast'
+import { toErrorMessage } from '@/lib/errors'
+import EditorWrapper from '@/components/editor/EditorWrapper'
 
 interface ContentVersion {
   id: string
@@ -33,6 +37,7 @@ export default function ContentVersionsPage() {
   const [loading, setLoading] = useState(true)
   const [restoring, setRestoring] = useState<string | null>(null)
   const [selectedVersion, setSelectedVersion] = useState<ContentVersion | null>(null)
+  const { toast, showToast, dismiss } = useToast()
 
   useEffect(() => {
     loadData()
@@ -106,7 +111,7 @@ export default function ContentVersionsPage() {
     setRestoring(null)
 
     if (error) {
-      alert('Failed to restore version')
+      showToast(toErrorMessage(error, 'Failed to restore version'), 'error')
       return
     }
 
@@ -219,46 +224,14 @@ export default function ContentVersionsPage() {
                   <h3 className="font-medium mb-4">
                     Preview - Version {selectedVersion.version_number}
                   </h3>
-                  <div className="prose prose-sm max-w-none dark:prose-invert">
-                    {selectedVersion.body?.content?.map((node: any, index: number) => (
-                      <div key={index}>
-                        {node.type === 'paragraph' && (
-                          <p className="mb-2">
-                            {node.content?.map((c: any) => c.text || '').join('')}
-                          </p>
-                        )}
-                        {node.type === 'heading' && (
-                          <h4 className="text-lg font-semibold mt-4 mb-2">
-                            {node.content?.map((c: any) => c.text || '').join('')}
-                          </h4>
-                        )}
-                        {node.type === 'bulletList' && (
-                          <ul className="list-disc pl-6 mb-2">
-                            {node.content?.map((item: any, i: number) => (
-                              <li key={i}>
-                                {item.content?.map((c: any) => c.text || '').join('')}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                        {node.type === 'orderedList' && (
-                          <ol className="list-decimal pl-6 mb-2">
-                            {node.content?.map((item: any, i: number) => (
-                              <li key={i}>
-                                {item.content?.map((c: any) => c.text || '').join('')}
-                              </li>
-                            ))}
-                          </ol>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                  <EditorWrapper content={selectedVersion.body} editable={false} />
                 </div>
               )}
             </div>
           )}
         </div>
       </main>
+      {toast && <Toast message={toast.message} type={toast.type} onDismiss={dismiss} />}
     </div>
   )
 }

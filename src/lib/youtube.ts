@@ -50,7 +50,7 @@ export function formatDuration(seconds: number): string {
 }
 
 export function parseYouTubeDuration(duration: string): number {
-  const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/)
+  const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/)
   if (!match) return 0
 
   const hours = parseInt(match[1] || '0', 10)

@@ -29,11 +29,11 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <body className="min-h-screen flex flex-col bg-background text-foreground font-body antialiased">
         {process.env.NODE_ENV === 'development' && <DevBanner />}
-        <TabBar />
+        {process.env.NODE_ENV === 'development' && <DevTabBar />}
         <div className="flex-1">{children}</div>
-        <footer className="border-t py-4">
-          <p className="text-center text-xs text-muted-foreground">
-            Powered by Adduckivity · v{process.env.npm_package_version ?? '0.1.0'}
+        <footer className="border-t py-3">
+          <p className="container mx-auto px-4 text-xs text-muted-foreground/50">
+            PeakLearn v{process.env.npm_package_version ?? '0.1.0'}
           </p>
         </footer>
       </body>

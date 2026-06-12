@@ -7,9 +7,11 @@ const Editor = dynamic(() => import('@/components/editor/Editor'), {
   loading: () => <div className="p-4">Loading editor...</div>,
 })
 
+type TipTapContent = string | Record<string, unknown> | null
+
 interface EditorWrapperProps {
-  content: any
-  onChange?: (content: any) => void
+  content?: TipTapContent
+  onChange?: (content: Record<string, unknown>) => void
   editable?: boolean
   className?: string
 }

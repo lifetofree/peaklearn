@@ -68,6 +68,7 @@ export default async function DashboardPage() {
       .from('collections')
       .select('id,title,description')
       .order('created_at', { ascending: false })
+      .limit(5)
       .returns<Collection[]>(),
   ])
 

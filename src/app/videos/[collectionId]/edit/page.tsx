@@ -10,6 +10,9 @@ import { Input } from '@/components/ui/input'
 import DuckLogo from '@/components/DuckLogo'
 import { ArrowLeft, Save, Trash2 } from 'lucide-react'
 import Link from 'next/link'
+import { Toast } from '@/components/ui/toast'
+import { useToast } from '@/hooks/use-toast'
+import { toErrorMessage } from '@/lib/errors'
 
 export default function EditCollectionPage() {
   const params = useParams()
@@ -21,12 +24,22 @@ export default function EditCollectionPage() {
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [notFound, setNotFound] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
+  const { toast, showToast, dismiss } = useToast()
 
   const loadCollection = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      router.push('/login')
+      return
+    }
+    setUserId(user.id)
+
     const { data, error } = await supabase
       .from('collections')
       .select('*')
       .eq('id', params.collectionId)
+      .eq('user_id', user.id)
       .single()
 
     if (error || !data) {
@@ -44,25 +57,27 @@ export default function EditCollectionPage() {
 
   const handleSave = async () => {
     if (!title.trim()) {
-      alert('Please enter a title')
+      showToast('Please enter a title', 'error')
       return
     }
 
     setSaving(true)
 
-    const { error } = await supabase
-      .from('collections')
-      .update({ title, description })
-      .eq('id', params.collectionId)
+    try {
+      const { error } = await supabase
+        .from('collections')
+        .update({ title, description })
+        .eq('id', params.collectionId)
+        .eq('user_id', userId)
 
-    setSaving(false)
+      if (error) throw error
 
-    if (error) {
-      alert('Failed to update collection')
-      return
+      router.push(`/videos/${params.collectionId}`)
+    } catch (err) {
+      showToast(toErrorMessage(err, 'Failed to update collection'), 'error')
+    } finally {
+      setSaving(false)
     }
-
-    router.push(`/videos/${params.collectionId}`)
   }
 
   const handleDelete = async () => {
@@ -70,19 +85,21 @@ export default function EditCollectionPage() {
 
     setDeleting(true)
 
-    const { error } = await supabase
-      .from('collections')
-      .delete()
-      .eq('id', params.collectionId)
+    try {
+      const { error } = await supabase
+        .from('collections')
+        .delete()
+        .eq('id', params.collectionId)
+        .eq('user_id', userId)
 
-    setDeleting(false)
+      if (error) throw error
 
-    if (error) {
-      alert('Failed to delete collection')
-      return
+      router.push('/videos')
+    } catch (err) {
+      showToast(toErrorMessage(err, 'Failed to delete collection'), 'error')
+    } finally {
+      setDeleting(false)
     }
-
-    router.push('/videos')
   }
 
   if (notFound) {
@@ -162,6 +179,7 @@ export default function EditCollectionPage() {
           </div>
         </div>
       </main>
+      {toast && <Toast message={toast.message} type={toast.type} onDismiss={dismiss} />}
     </div>
   )
 }

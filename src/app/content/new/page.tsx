@@ -11,62 +11,54 @@ import DuckLogo from '@/components/DuckLogo'
 import EditorWrapper from '@/components/editor/EditorWrapper'
 import { ArrowLeft, Save, X, Tag } from 'lucide-react'
 import Link from 'next/link'
+import { Toast } from '@/components/ui/toast'
+import { useToast } from '@/hooks/use-toast'
+import { useTagInput } from '@/hooks/useTagInput'
+import { toErrorMessage } from '@/lib/errors'
 
 export default function NewContentPage() {
   const router = useRouter()
   const supabase = createClient()
 
   const [title, setTitle] = useState('')
-  const [content, setContent] = useState<any>({})
-  const [tags, setTags] = useState<string[]>([])
-  const [tagInput, setTagInput] = useState('')
+  const [content, setContent] = useState<any>(null)
   const [isPublished, setIsPublished] = useState(false)
   const [saving, setSaving] = useState(false)
+  const { toast, showToast, dismiss } = useToast()
+  const { tags, tagInput, setTagInput, addTag, removeTag } = useTagInput()
 
   const handleSave = async () => {
     if (!title.trim()) {
-      alert('Please enter a title')
+      showToast('Please enter a title', 'error')
       return
     }
 
     setSaving(true)
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
 
-    const { data, error } = await supabase
-      .from('content')
-      .insert({
-        title,
-        body: content,
-        tags,
-        is_published: isPublished,
-        created_by: user?.id || null,
-        updated_at: new Date().toISOString(),
-      })
-      .select()
-      .single()
+      const { data, error } = await supabase
+        .from('content')
+        .insert({
+          title,
+          body: content || {},
+          tags,
+          is_published: isPublished,
+          created_by: user?.id || null,
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single()
 
-    setSaving(false)
+      if (error) throw error
 
-    if (error) {
-      alert('Failed to create content')
-      return
+      router.push(`/content/${data.id}`)
+    } catch (err) {
+      showToast(toErrorMessage(err, 'Failed to create content'), 'error')
+    } finally {
+      setSaving(false)
     }
-
-    router.push(`/content/${data.id}`)
-  }
-
-  const addTag = () => {
-    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      setTags([...tags, tagInput.trim()])
-      setTagInput('')
-    }
-  }
-
-  const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter((t) => t !== tagToRemove))
   }
 
   return (
@@ -171,6 +163,7 @@ export default function NewContentPage() {
           </div>
         </div>
       </main>
+      {toast && <Toast message={toast.message} type={toast.type} onDismiss={dismiss} />}
     </div>
   )
 }

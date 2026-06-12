@@ -98,6 +98,7 @@ const translations: TranslationDict = {
   'videos.subtitle': 'Organize and manage your YouTube clips',
   'videos.new_collection': 'New Collection',
   'videos.add_video': 'Add Video',
+  'videos.no_videos': 'No videos yet',
   'videos.no_collections': 'No collections yet',
   'videos.no_collections_subtitle': 'Create collections to organize your videos',
   'videos.create_collection': 'Create Collection',

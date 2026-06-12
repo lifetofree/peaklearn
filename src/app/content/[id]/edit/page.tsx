@@ -13,6 +13,8 @@ import { ArrowLeft, Save, X, Tag, History } from 'lucide-react'
 import Link from 'next/link'
 import { Toast } from '@/components/ui/toast'
 import { useToast } from '@/hooks/use-toast'
+import { useTagInput } from '@/hooks/useTagInput'
+import { toErrorMessage } from '@/lib/errors'
 
 export default function ContentEditPage() {
   const params = useParams()
@@ -22,25 +24,33 @@ export default function ContentEditPage() {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState<any>(null)
   const [originalContent, setOriginalContent] = useState<any>(null)
-  const [tags, setTags] = useState<string[]>([])
-  const [tagInput, setTagInput] = useState('')
   const [isPublished, setIsPublished] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
   const { toast, showToast, dismiss } = useToast()
+  const { tags, setTags, tagInput, setTagInput, addTag, removeTag } = useTagInput()
 
   useEffect(() => {
     loadContent()
   }, [params.id])
 
   const loadContent = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      router.push('/login')
+      return
+    }
+    setUserId(user.id)
+
     const { data, error } = await supabase
       .from('content')
       .select('*')
       .eq('id', params.id)
+      .eq('created_by', user.id)
       .single()
 
-    if (error) {
+    if (error || !data) {
       router.push('/content')
       return
     }
@@ -54,6 +64,11 @@ export default function ContentEditPage() {
   }
 
   const handleSave = async () => {
+    if (!userId) {
+      showToast('You must be logged in', 'error')
+      return
+    }
+
     setSaving(true)
 
     if (originalContent) {
@@ -88,27 +103,17 @@ export default function ContentEditPage() {
         updated_at: new Date().toISOString(),
       })
       .eq('id', params.id)
+      .eq('created_by', userId)
 
     setSaving(false)
 
     if (error) {
-      showToast('Failed to save — please try again', 'error')
+      showToast(toErrorMessage(error, 'Failed to save — please try again'), 'error')
       return
     }
 
     setOriginalContent(content)
     showToast('Saved successfully')
-  }
-
-  const addTag = () => {
-    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      setTags([...tags, tagInput.trim()])
-      setTagInput('')
-    }
-  }
-
-  const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter((t) => t !== tagToRemove))
   }
 
   if (loading) {

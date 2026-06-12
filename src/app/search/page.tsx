@@ -1,11 +1,24 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-
-export const runtime = 'edge'
 import Link from 'next/link'
 import Header from '@/components/Header'
 import { FileText, Video, X } from 'lucide-react'
 import type { Content, Video as VideoType } from '@/types/database'
+
+type SearchContent = Pick<Content, 'id' | 'title' | 'tags' | 'updated_at' | 'is_published' | 'created_by'>
+
+function dedup<T extends { id: string }>(arrays: (T[] | null)[]): T[] {
+  const seen = new Set<string>()
+  const result: T[] = []
+  for (const arr of arrays) {
+    for (const item of arr || []) {
+      if (!seen.has(item.id)) {
+        seen.add(item.id)
+        result.push(item)
+      }
+    }
+  }
+  return result
+}
 
 export default async function SearchPage({
   searchParams,
@@ -18,7 +31,7 @@ export default async function SearchPage({
 
   const rawQuery = (sp.q || '').trim().slice(0, 100)
 
-  let contentResults: Content[] = []
+  let contentResults: SearchContent[] = []
   let videoResults: VideoType[] = []
 
   if (rawQuery) {
@@ -29,22 +42,15 @@ export default async function SearchPage({
       { data: videosByDesc },
       { data: videosByTag },
     ] = await Promise.all([
-      supabase.from('content').select('id,title,tags,updated_at,is_published,body,created_by').ilike('title', `%${rawQuery}%`).order('updated_at', { ascending: false }),
-      supabase.from('content').select('id,title,tags,updated_at,is_published,body,created_by').contains('tags', [rawQuery]).order('updated_at', { ascending: false }),
+      supabase.from('content').select('id,title,tags,updated_at,is_published,created_by').ilike('title', `%${rawQuery}%`).order('updated_at', { ascending: false }),
+      supabase.from('content').select('id,title,tags,updated_at,is_published,created_by').contains('tags', [rawQuery]).order('updated_at', { ascending: false }),
       supabase.from('videos').select('id,title,description,tags,thumbnail_url,youtube_url,collection_id,user_id,created_at,duration').ilike('title', `%${rawQuery}%`).order('created_at', { ascending: false }),
       supabase.from('videos').select('id,title,description,tags,thumbnail_url,youtube_url,collection_id,user_id,created_at,duration').ilike('description', `%${rawQuery}%`).order('created_at', { ascending: false }),
       supabase.from('videos').select('id,title,description,tags,thumbnail_url,youtube_url,collection_id,user_id,created_at,duration').contains('tags', [rawQuery]).order('created_at', { ascending: false }),
     ])
 
-    const seenContent = new Set<string>()
-    contentResults = [...(contentByTitle || []), ...(contentByTag || [])].filter(
-      (item) => !seenContent.has(item.id) && !!seenContent.add(item.id)
-    ) as Content[]
-
-    const seenVideos = new Set<string>()
-    videoResults = [...(videosByTitle || []), ...(videosByDesc || []), ...(videosByTag || [])].filter(
-      (item) => !seenVideos.has(item.id) && !!seenVideos.add(item.id)
-    ) as VideoType[]
+    contentResults = dedup<SearchContent>([contentByTitle, contentByTag])
+    videoResults = dedup<VideoType>([videosByTitle, videosByDesc, videosByTag])
   }
 
   return (

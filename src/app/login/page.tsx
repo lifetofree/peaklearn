@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import DuckLogo from '@/components/DuckLogo'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { devBypassLogin } from './actions'
+import { toErrorMessage } from '@/lib/errors'
 
 const isDev = process.env.NODE_ENV === 'development'
 
@@ -34,10 +36,10 @@ export default function LoginPage() {
         text: 'Check your email for the magic link',
       })
       setEmail('')
-    } catch (error: any) {
+    } catch (error: unknown) {
       setMessage({
         type: 'error',
-        text: error.message || 'Failed to send magic link',
+        text: toErrorMessage(error, 'Failed to send magic link'),
       })
     } finally {
       setLoading(false)
@@ -45,36 +47,14 @@ export default function LoginPage() {
   }
 
   const handleDevBypass = async () => {
-    const bypassEmail = process.env.NEXT_PUBLIC_DEV_BYPASS_EMAIL
-    const bypassPassword = process.env.NEXT_PUBLIC_DEV_BYPASS_PASSWORD
-    if (!bypassEmail || !bypassPassword) {
-      setMessage({
-        type: 'error',
-        text: 'Dev bypass credentials not configured',
-      })
-      return
-    }
-
     setLoading(true)
     setMessage(null)
 
-    try {
-      const supabase = await createClient()
-      const { error } = await supabase.auth.signInWithPassword({
-        email: bypassEmail,
-        password: bypassPassword,
-      })
+    const result = await devBypassLogin()
 
-      if (error) throw error
-
-      window.location.href = '/dashboard'
-    } catch (error: any) {
-      setMessage({
-        type: 'error',
-        text: error.message || 'Dev bypass failed',
-      })
-    } finally {
-      setLoading(false)
+    setLoading(false)
+    if (result?.error) {
+      setMessage({ type: 'error', text: result.error })
     }
   }
 
@@ -160,7 +140,7 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        {isDev && process.env.NEXT_PUBLIC_ENABLE_DEV_BYPASS === 'true' && (
+        {isDev && (
           <div className="mt-8 pt-8 border-t border-border">
             <Button
               type="button"

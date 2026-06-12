@@ -16,9 +16,11 @@ import {
   Redo,
 } from 'lucide-react'
 
+type TipTapContent = string | Record<string, unknown> | null
+
 interface EditorProps {
-  content?: any
-  onChange?: (content: any) => void
+  content?: TipTapContent
+  onChange?: (content: Record<string, unknown>) => void
   editable?: boolean
   className?: string
 }
@@ -99,7 +101,7 @@ export default function Editor({
               if (!input) return
               try {
                 const parsed = new URL(input)
-                if (!['http:', 'https:'].includes(parsed.protocol)) return
+                if (!['http:', 'https:', 'mailto:'].includes(parsed.protocol)) return
                 editor.chain().focus().setLink({ href: parsed.href }).run()
               } catch {
                 // invalid URL — do nothing

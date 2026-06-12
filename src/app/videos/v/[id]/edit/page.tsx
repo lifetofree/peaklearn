@@ -10,6 +10,12 @@ import { Input } from '@/components/ui/input'
 import DuckLogo from '@/components/DuckLogo'
 import { ArrowLeft, Save, Trash2, X, Tag, Folder } from 'lucide-react'
 import Link from 'next/link'
+import { Toast } from '@/components/ui/toast'
+import { useToast } from '@/hooks/use-toast'
+import { useTagInput } from '@/hooks/useTagInput'
+import { toErrorMessage } from '@/lib/errors'
+
+type CollectionOption = { id: string; title: string }
 
 export default function EditVideoPage() {
   const params = useParams()
@@ -18,19 +24,27 @@ export default function EditVideoPage() {
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [tags, setTags] = useState<string[]>([])
-  const [tagInput, setTagInput] = useState('')
   const [collectionId, setCollectionId] = useState('')
-  const [collections, setCollections] = useState<any[]>([])
+  const [collections, setCollections] = useState<CollectionOption[]>([])
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [notFound, setNotFound] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
+  const { toast, showToast, dismiss } = useToast()
+  const { tags, setTags, tagInput, setTagInput, addTag, removeTag } = useTagInput()
 
   useEffect(() => {
     const init = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        router.push('/login')
+        return
+      }
+      setUserId(user.id)
+
       const [videoRes, colRes] = await Promise.all([
-        supabase.from('videos').select('*').eq('id', params.id).single(),
-        supabase.from('collections').select('*').order('title'),
+        supabase.from('videos').select('*').eq('id', params.id).eq('user_id', user.id).single(),
+        supabase.from('collections').select('id, title').eq('user_id', user.id).order('title'),
       ])
 
       if (videoRes.error || !videoRes.data) {
@@ -51,30 +65,32 @@ export default function EditVideoPage() {
 
   const handleSave = async () => {
     if (!title.trim()) {
-      alert('Please enter a title')
+      showToast('Please enter a title', 'error')
       return
     }
 
     setSaving(true)
 
-    const { error } = await supabase
-      .from('videos')
-      .update({
-        title,
-        description,
-        tags,
-        collection_id: collectionId || null,
-      })
-      .eq('id', params.id)
+    try {
+      const { error } = await supabase
+        .from('videos')
+        .update({
+          title,
+          description,
+          tags,
+          collection_id: collectionId || null,
+        })
+        .eq('id', params.id)
+        .eq('user_id', userId)
 
-    setSaving(false)
+      if (error) throw error
 
-    if (error) {
-      alert('Failed to update video')
-      return
+      router.push(`/videos/v/${params.id}`)
+    } catch (err) {
+      showToast(toErrorMessage(err, 'Failed to update video'), 'error')
+    } finally {
+      setSaving(false)
     }
-
-    router.push(`/videos/v/${params.id}`)
   }
 
   const handleDelete = async () => {
@@ -82,30 +98,21 @@ export default function EditVideoPage() {
 
     setDeleting(true)
 
-    const { error } = await supabase
-      .from('videos')
-      .delete()
-      .eq('id', params.id)
+    try {
+      const { error } = await supabase
+        .from('videos')
+        .delete()
+        .eq('id', params.id)
+        .eq('user_id', userId)
 
-    setDeleting(false)
+      if (error) throw error
 
-    if (error) {
-      alert('Failed to delete video')
-      return
+      router.push('/videos')
+    } catch (err) {
+      showToast(toErrorMessage(err, 'Failed to delete video'), 'error')
+    } finally {
+      setDeleting(false)
     }
-
-    router.push('/videos')
-  }
-
-  const addTag = () => {
-    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      setTags([...tags, tagInput.trim()])
-      setTagInput('')
-    }
-  }
-
-  const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter((t) => t !== tagToRemove))
   }
 
   if (notFound) {
@@ -239,6 +246,7 @@ export default function EditVideoPage() {
           </div>
         </div>
       </main>
+      {toast && <Toast message={toast.message} type={toast.type} onDismiss={dismiss} />}
     </div>
   )
 }
