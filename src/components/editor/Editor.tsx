@@ -16,9 +16,11 @@ import {
   Redo,
 } from 'lucide-react'
 
+type TipTapContent = string | Record<string, unknown> | null
+
 interface EditorProps {
-  content?: any
-  onChange?: (content: any) => void
+  content?: TipTapContent
+  onChange?: (content: Record<string, unknown>) => void
   editable?: boolean
   className?: string
 }

@@ -4,6 +4,8 @@ import Header from '@/components/Header'
 import { FileText, Video, X } from 'lucide-react'
 import type { Content, Video as VideoType } from '@/types/database'
 
+type SearchContent = Pick<Content, 'id' | 'title' | 'tags' | 'updated_at' | 'is_published' | 'created_by'>
+
 function dedup<T extends { id: string }>(arrays: (T[] | null)[]): T[] {
   const seen = new Set<string>()
   const result: T[] = []
@@ -29,7 +31,7 @@ export default async function SearchPage({
 
   const rawQuery = (sp.q || '').trim().slice(0, 100)
 
-  let contentResults: Content[] = []
+  let contentResults: SearchContent[] = []
   let videoResults: VideoType[] = []
 
   if (rawQuery) {
@@ -47,7 +49,7 @@ export default async function SearchPage({
       supabase.from('videos').select('id,title,description,tags,thumbnail_url,youtube_url,collection_id,user_id,created_at,duration').contains('tags', [rawQuery]).order('created_at', { ascending: false }),
     ])
 
-    contentResults = dedup<Content>([contentByTitle, contentByTag])
+    contentResults = dedup<SearchContent>([contentByTitle, contentByTag])
     videoResults = dedup<VideoType>([videosByTitle, videosByDesc, videosByTag])
   }
 

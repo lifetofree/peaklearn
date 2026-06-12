@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { Toast } from '@/components/ui/toast'
 import { useToast } from '@/hooks/use-toast'
 import { toErrorMessage } from '@/lib/errors'
+import EditorWrapper from '@/components/editor/EditorWrapper'
 
 interface ContentVersion {
   id: string
@@ -221,40 +222,7 @@ export default function ContentVersionsPage() {
                   <h3 className="font-medium mb-4">
                     Preview - Version {selectedVersion.version_number}
                   </h3>
-                  <div className="prose prose-sm max-w-none dark:prose-invert">
-                    {selectedVersion.body?.content?.map((node: any, index: number) => (
-                      <div key={index}>
-                        {node.type === 'paragraph' && (
-                          <p className="mb-2">
-                            {node.content?.map((c: any) => c.text || '').join('')}
-                          </p>
-                        )}
-                        {node.type === 'heading' && (
-                          <h4 className="text-lg font-semibold mt-4 mb-2">
-                            {node.content?.map((c: any) => c.text || '').join('')}
-                          </h4>
-                        )}
-                        {node.type === 'bulletList' && (
-                          <ul className="list-disc pl-6 mb-2">
-                            {node.content?.map((item: any, i: number) => (
-                              <li key={i}>
-                                {item.content?.map((c: any) => c.text || '').join('')}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                        {node.type === 'orderedList' && (
-                          <ol className="list-decimal pl-6 mb-2">
-                            {node.content?.map((item: any, i: number) => (
-                              <li key={i}>
-                                {item.content?.map((c: any) => c.text || '').join('')}
-                              </li>
-                            ))}
-                          </ol>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                  <EditorWrapper content={selectedVersion.body} editable={false} />
                 </div>
               )}
             </div>

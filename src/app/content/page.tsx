@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import DuckLogo from '@/components/DuckLogo'
 import { Plus, FileText, Tag, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import type { Content } from '@/types/database'
 
 const PAGE_SIZE = 20
 
@@ -34,7 +35,7 @@ export default async function ContentListPage({
     .select('tags')
 
   const uniqueTags = Array.from(
-    new Set(allTags?.flatMap((c: any) => c.tags) || [])
+    new Set(allTags?.flatMap((c: Pick<Content, 'tags'>) => c.tags) || [])
   )
 
   const toggleTag = (tag: string) => {
@@ -116,7 +117,7 @@ export default async function ContentListPage({
 
         <div className="grid gap-4">
           {content && content.length > 0 ? (
-            content.map((item: any) => (
+            content.map((item: Content) => (
               <div
                 key={item.id}
                 className="border rounded-lg p-6 hover:bg-accent/50 transition-colors"

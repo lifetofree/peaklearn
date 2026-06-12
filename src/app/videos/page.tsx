@@ -4,6 +4,9 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import DuckLogo from '@/components/DuckLogo'
 import { Plus, Folder, Video, Edit, ChevronLeft, ChevronRight } from 'lucide-react'
+import type { Collection, Video as VideoType } from '@/types/database'
+
+type CollectionWithCount = Collection & { videos: [{ count: number }] }
 
 const PAGE_SIZE = 12
 
@@ -61,7 +64,7 @@ export default async function VideosPage({
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {collections && collections.length > 0 ? (
-            collections.map((collection: any) => (
+            collections.map((collection: CollectionWithCount) => (
               <div
                 key={collection.id}
                 className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
@@ -129,7 +132,7 @@ export default async function VideosPage({
               </p>
             </div>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {uncategorizedVideos.map((video: any) => (
+              {uncategorizedVideos.map((video: VideoType) => (
                 <Link
                   key={video.id}
                   href={`/videos/v/${video.id}`}
