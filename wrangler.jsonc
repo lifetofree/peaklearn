@@ -26,6 +26,9 @@
       "enabled": true
     }
   },
+  "routes": [
+    { "pattern": "peaklearn.adduckivity.com/*", "zone_name": "adduckivity.com" }
+  ],
   "vars": {
     "NEXT_PUBLIC_SITE_URL": "https://peaklearn.adduckivity.com"
   }
