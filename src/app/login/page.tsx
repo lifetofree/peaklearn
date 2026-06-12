@@ -45,6 +45,10 @@ export default function LoginPage() {
   }
 
   const handleDevBypass = async () => {
+    if (process.env.NODE_ENV === 'production') {
+      setMessage({ type: 'error', text: 'Dev bypass not available in production' })
+      return
+    }
     const bypassEmail = process.env.NEXT_PUBLIC_DEV_BYPASS_EMAIL
     const bypassPassword = process.env.NEXT_PUBLIC_DEV_BYPASS_PASSWORD
     if (!bypassEmail || !bypassPassword) {

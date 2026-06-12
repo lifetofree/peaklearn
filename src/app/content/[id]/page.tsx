@@ -10,7 +10,19 @@ async function deleteContent(formData: FormData) {
   'use server'
   const id = formData.get('id') as string
   const supabase = await createClient()
-  await supabase.from('content').delete().eq('id', id)
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const { data: item } = await supabase
+    .from('content')
+    .select('created_by')
+    .eq('id', id)
+    .single()
+
+  if (!item || item.created_by !== user.id) redirect('/content')
+
+  await supabase.from('content').delete().eq('id', id).eq('created_by', user.id)
   redirect('/content')
 }
 

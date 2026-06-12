@@ -11,6 +11,10 @@ import Link from 'next/link'
 import { extractYouTubeId, getYouTubeThumbnail } from '@/lib/youtube'
 import { Toast } from '@/components/ui/toast'
 import { useToast } from '@/hooks/use-toast'
+import { useTagInput } from '@/hooks/useTagInput'
+import { toErrorMessage } from '@/lib/errors'
+
+type CollectionOption = { id: string; title: string }
 
 export default function AddVideoPage() {
   const router = useRouter()
@@ -20,10 +24,9 @@ export default function AddVideoPage() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [duration, setDuration] = useState(0)
-  const [tags, setTags] = useState<string[]>([])
-  const [tagInput, setTagInput] = useState('')
   const [collectionId, setCollectionId] = useState('')
-  const [collections, setCollections] = useState<any[]>([])
+  const [collections, setCollections] = useState<CollectionOption[]>([])
+  const { tags, tagInput, setTagInput, addTag, removeTag } = useTagInput()
   const [loading, setLoading] = useState(false)
   const [fetchingVideo, setFetchingVideo] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -36,12 +39,10 @@ export default function AddVideoPage() {
   const loadCollections = async () => {
     const { data } = await supabase
       .from('collections')
-      .select('*')
+      .select('id, title')
       .order('title')
 
-    if (data) {
-      setCollections(data)
-    }
+    if (data) setCollections(data)
   }
 
   const fetchVideoInfo = async () => {
@@ -115,17 +116,6 @@ export default function AddVideoPage() {
     } else {
       router.push('/videos')
     }
-  }
-
-  const addTag = () => {
-    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      setTags([...tags, tagInput.trim()])
-      setTagInput('')
-    }
-  }
-
-  const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter((t) => t !== tagToRemove))
   }
 
   return (

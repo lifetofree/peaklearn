@@ -7,6 +7,9 @@ import { Button } from '@/components/ui/button'
 import DuckLogo from '@/components/DuckLogo'
 import { ArrowLeft, History, RotateCcw, Eye } from 'lucide-react'
 import Link from 'next/link'
+import { Toast } from '@/components/ui/toast'
+import { useToast } from '@/hooks/use-toast'
+import { toErrorMessage } from '@/lib/errors'
 
 interface ContentVersion {
   id: string
@@ -31,6 +34,7 @@ export default function ContentVersionsPage() {
   const [loading, setLoading] = useState(true)
   const [restoring, setRestoring] = useState<string | null>(null)
   const [selectedVersion, setSelectedVersion] = useState<ContentVersion | null>(null)
+  const { toast, showToast, dismiss } = useToast()
 
   useEffect(() => {
     loadData()
@@ -104,7 +108,7 @@ export default function ContentVersionsPage() {
     setRestoring(null)
 
     if (error) {
-      alert('Failed to restore version')
+      showToast(toErrorMessage(error, 'Failed to restore version'), 'error')
       return
     }
 
@@ -257,6 +261,7 @@ export default function ContentVersionsPage() {
           )}
         </div>
       </main>
+      {toast && <Toast message={toast.message} type={toast.type} onDismiss={dismiss} />}
     </div>
   )
 }
